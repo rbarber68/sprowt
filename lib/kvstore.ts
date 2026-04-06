@@ -39,4 +39,6 @@ export const KV_KEYS = {
   ONBOARDING_COMPLETE: 'onboardingComplete',
   GOOGLE_AI_API_KEY: 'googleAiApiKey',
   COACH_INTENSITY: 'coachIntensity',
+  SOUNDS_MUTED: 'soundsMuted',
+  TTS_ENABLED: 'ttsEnabled',
 } as const
