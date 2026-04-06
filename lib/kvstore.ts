@@ -37,10 +37,10 @@ export function getKVStore(key: string): string | null {
   const db = getRawDb()
   if (!db) return null
   try {
-    const row = db.getFirstSync<{ value: string }>(
+    const row = db.getFirstSync(
       'SELECT value FROM kv_store WHERE key = ?',
       [key]
-    )
+    ) as { value: string } | null
     return row?.value ?? null
   } catch {
     return null
