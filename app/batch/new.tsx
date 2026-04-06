@@ -1,7 +1,7 @@
 import { View, Text, Pressable, ScrollView, TextInput, ActivityIndicator } from 'react-native'
 import { useState, useEffect, useCallback } from 'react'
 import { router, useLocalSearchParams } from 'expo-router'
-import { v4 as uuidv4 } from 'uuid'
+import { uuidv4 } from '@/lib/uuid'
 import { SPROUT_TYPES, TRAY_SPROUTS, BEGINNER_PROGRESSION, type BeanType } from '@/data/sproutTypes'
 import { generateCharacter, type CharacterTraits } from '@/data/characters'
 import { CharacterAvatar } from '@/components/CharacterAvatar'

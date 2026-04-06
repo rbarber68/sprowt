@@ -1,7 +1,7 @@
 import { View, Text, Pressable, ScrollView, Modal, Alert, TextInput } from 'react-native'
 import { useLocalSearchParams, router, Stack } from 'expo-router'
 import { useEffect, useState, useCallback } from 'react'
-import { v4 as uuidv4 } from 'uuid'
+import { uuidv4 } from '@/lib/uuid'
 import { db } from '@/db/client'
 import { batches, characters, beanTypes, dailyLogs } from '@/db/schema'
 import { eq, and, desc } from 'drizzle-orm'

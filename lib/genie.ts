@@ -3,7 +3,7 @@
  * Central AI layer: system prompt, context injection, memory management
  */
 
-import { v4 as uuidv4 } from 'uuid'
+import { uuidv4 } from './uuid'
 import { db } from '@/db/client'
 import { batches, beanTypes, characters, containers, genieMemory, genieMessages } from '@/db/schema'
 import { eq, and, ne, desc, isNotNull, sql } from 'drizzle-orm'
