@@ -1,0 +1,20 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1775435576920,
+      "tag": "0000_mean_piledriver",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1775443534803,
+      "tag": "0001_shocking_captain_flint",
+      "breakpoints": true
+    }
+  ]
+}
