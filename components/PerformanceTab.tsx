@@ -3,7 +3,7 @@
  * Stats cards, combo table, Genie analysis button
  */
 
-import { View, Text, Pressable, ScrollView } from 'react-native'
+import { View, Text, TouchableOpacity, ScrollView } from 'react-native'
 import { useState, useEffect } from 'react'
 import { getPerformanceSummary, type PerformanceSummary, type ComboStats } from '@/lib/performance'
 
@@ -20,10 +20,10 @@ export function PerformanceTab({ onOpenGenie }: PerformanceTabProps) {
 
   if (!data || data.totalTrackedBatches === 0) {
     return (
-      <View className="flex-1 items-center justify-center p-6">
-        <Text className="text-5xl mb-4">{'\ud83d\udcca'}</Text>
-        <Text className="text-xl font-bold text-sprout-800 mb-2">No yield data yet</Text>
-        <Text className="text-gray-500 text-center">
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+        <Text style={{ fontSize: 48, marginBottom: 16 }}>{'\ud83d\udcca'}</Text>
+        <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#27500A', marginBottom: 8 }}>No yield data yet</Text>
+        <Text style={{ color: '#6b7280', textAlign: 'center' }}>
           Complete a batch with yield tracking to see performance analytics.
         </Text>
       </View>
@@ -31,55 +31,56 @@ export function PerformanceTab({ onOpenGenie }: PerformanceTabProps) {
   }
 
   return (
-    <ScrollView className="flex-1 p-4">
+    <ScrollView style={{ flex: 1, padding: 16 }}>
       {/* Stats cards */}
-      <View className="flex-row gap-3 mb-4">
-        <View className="flex-1 bg-sprout-50 rounded-card p-3 items-center">
-          <Text className="text-2xl font-bold text-sprout-600">{data.totalTrackedBatches}</Text>
-          <Text className="text-xs text-gray-500">Tracked</Text>
+      <View style={{ flexDirection: 'row', gap: 12, marginBottom: 16 }}>
+        <View style={{ flex: 1, backgroundColor: '#EAF3DE', borderRadius: 12, padding: 12, alignItems: 'center' }}>
+          <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#3B6D11' }}>{data.totalTrackedBatches}</Text>
+          <Text style={{ fontSize: 12, color: '#6b7280' }}>Tracked</Text>
         </View>
         {data.bestCombo && (
-          <View className="flex-1 bg-soak-50 rounded-card p-3 items-center">
-            <Text className="text-2xl font-bold text-soak-600">{data.bestCombo.avgYieldRatio.toFixed(1)}x</Text>
-            <Text className="text-xs text-gray-500">Best yield</Text>
+          <View style={{ flex: 1, backgroundColor: '#FAEEDA', borderRadius: 12, padding: 12, alignItems: 'center' }}>
+            <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#EF9F27' }}>{data.bestCombo.avgYieldRatio.toFixed(1)}x</Text>
+            <Text style={{ fontSize: 12, color: '#6b7280' }}>Best yield</Text>
           </View>
         )}
         {data.mostConsistent && (
-          <View className="flex-1 bg-info-50 rounded-card p-3 items-center">
-            <Text className="text-2xl font-bold text-info-600">{data.mostConsistent.avgYieldRatio.toFixed(1)}x</Text>
-            <Text className="text-xs text-gray-500">Most consistent</Text>
+          <View style={{ flex: 1, backgroundColor: '#E6F1FB', borderRadius: 12, padding: 12, alignItems: 'center' }}>
+            <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#185FA5' }}>{data.mostConsistent.avgYieldRatio.toFixed(1)}x</Text>
+            <Text style={{ fontSize: 12, color: '#6b7280' }}>Most consistent</Text>
           </View>
         )}
       </View>
 
       {/* Best combo highlight */}
       {data.bestCombo && (
-        <View className="bg-sprout-50 border border-sprout-200 rounded-card p-4 mb-4">
-          <Text className="text-sm font-medium text-sprout-800 mb-1">{'\ud83c\udfc6'} Best Combo</Text>
-          <Text className="text-sprout-600">
+        <View style={{ backgroundColor: '#EAF3DE', borderWidth: 1, borderColor: '#97C459', borderRadius: 12, padding: 16, marginBottom: 16 }}>
+          <Text style={{ fontSize: 14, fontWeight: '500', color: '#27500A', marginBottom: 4 }}>{'\ud83c\udfc6'} Best Combo</Text>
+          <Text style={{ color: '#3B6D11' }}>
             {data.bestCombo.beanEmoji} {data.bestCombo.beanName} in {data.bestCombo.containerName}
           </Text>
-          <Text className="text-xs text-gray-500">
+          <Text style={{ fontSize: 12, color: '#6b7280' }}>
             {data.bestCombo.avgYieldRatio.toFixed(1)}x yield {'\u00b7'} {data.bestCombo.avgFillPct.toFixed(0)}% fill {'\u00b7'} {data.bestCombo.avgRating.toFixed(1)} stars {'\u00b7'} {data.bestCombo.batchCount} batches
           </Text>
         </View>
       )}
 
       {/* Ask the Genie */}
-      <Pressable
-        className="bg-info-50 border border-info-200 rounded-card p-4 mb-4 flex-row items-center"
+      <TouchableOpacity
+        activeOpacity={0.7}
+        style={{ backgroundColor: '#E6F1FB', borderWidth: 1, borderColor: '#85B7EB', borderRadius: 12, padding: 16, marginBottom: 16, flexDirection: 'row', alignItems: 'center' }}
         onPress={onOpenGenie}
       >
-        <Text className="text-xl mr-3">{'\ud83e\uddde'}</Text>
-        <View className="flex-1">
-          <Text className="text-info-600 font-medium">Ask the Genie</Text>
-          <Text className="text-xs text-gray-500">Get AI-powered performance analysis</Text>
+        <Text style={{ fontSize: 20, marginRight: 12 }}>{'\ud83e\uddde'}</Text>
+        <View style={{ flex: 1 }}>
+          <Text style={{ color: '#185FA5', fontWeight: '500' }}>Ask the Genie</Text>
+          <Text style={{ fontSize: 12, color: '#6b7280' }}>Get AI-powered performance analysis</Text>
         </View>
-        <Text className="text-info-400">{'\u203a'}</Text>
-      </Pressable>
+        <Text style={{ color: '#85B7EB' }}>{'\u203a'}</Text>
+      </TouchableOpacity>
 
       {/* Combo table */}
-      <Text className="text-lg font-bold text-sprout-800 mb-3">All Combos</Text>
+      <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#27500A', marginBottom: 12 }}>All Combos</Text>
       {data.combos.map((combo, i) => (
         <ComboRow key={`${combo.beanTypeId}-${combo.containerId}`} combo={combo} rank={i + 1} />
       ))}
@@ -89,16 +90,16 @@ export function PerformanceTab({ onOpenGenie }: PerformanceTabProps) {
 
 function ComboRow({ combo, rank }: { combo: ComboStats; rank: number }) {
   return (
-    <View className="flex-row items-center py-3 border-b border-gray-50">
-      <Text className="text-sm text-gray-400 w-6">#{rank}</Text>
-      <Text className="text-lg mr-2">{combo.beanEmoji}</Text>
-      <View className="flex-1">
-        <Text className="text-sm font-medium text-sprout-800">{combo.beanName}</Text>
-        <Text className="text-xs text-gray-500">{combo.containerName}</Text>
+    <View style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#f9fafb' }}>
+      <Text style={{ fontSize: 14, color: '#9ca3af', width: 24 }}>#{rank}</Text>
+      <Text style={{ fontSize: 18, marginRight: 8 }}>{combo.beanEmoji}</Text>
+      <View style={{ flex: 1 }}>
+        <Text style={{ fontSize: 14, fontWeight: '500', color: '#27500A' }}>{combo.beanName}</Text>
+        <Text style={{ fontSize: 12, color: '#6b7280' }}>{combo.containerName}</Text>
       </View>
-      <View className="items-end">
-        <Text className="text-sm font-bold text-sprout-600">{combo.avgYieldRatio.toFixed(1)}x</Text>
-        <Text className="text-xs text-gray-400">
+      <View style={{ alignItems: 'flex-end' }}>
+        <Text style={{ fontSize: 14, fontWeight: 'bold', color: '#3B6D11' }}>{combo.avgYieldRatio.toFixed(1)}x</Text>
+        <Text style={{ fontSize: 12, color: '#9ca3af' }}>
           {combo.avgRating.toFixed(1)}{'\u2605'} {'\u00b7'} {combo.batchCount} batches
         </Text>
       </View>

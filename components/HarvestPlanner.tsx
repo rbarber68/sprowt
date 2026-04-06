@@ -24,43 +24,43 @@ export function HarvestPlanner({
     d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 
   return (
-    <View className="bg-white rounded-card p-4 border border-gray-200">
-      <Text className="text-lg font-bold text-sprout-800 mb-4">
+    <View style={{ backgroundColor: '#ffffff', borderRadius: 12, padding: 16, borderWidth: 1, borderColor: '#e5e7eb' }}>
+      <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#27500A', marginBottom: 16 }}>
         {beanEmoji} {beanName} Timeline
       </Text>
 
-      <View className="flex-row items-center justify-between">
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
         {/* Soak */}
-        <View className="items-center flex-1">
-          <View className="w-8 h-8 rounded-full bg-soak-200 items-center justify-center">
+        <View style={{ alignItems: 'center', flex: 1 }}>
+          <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: '#EF9F27', alignItems: 'center', justifyContent: 'center' }}>
             <Text>💧</Text>
           </View>
-          <Text className="text-xs text-gray-600 mt-1">Soak</Text>
-          <Text className="text-xs font-medium text-soak-600">{formatDate(soakDate)}</Text>
+          <Text style={{ fontSize: 12, color: '#4b5563', marginTop: 4 }}>Soak</Text>
+          <Text style={{ fontSize: 12, fontWeight: '500', color: '#EF9F27' }}>{formatDate(soakDate)}</Text>
         </View>
 
         {/* Line */}
-        <View className="h-0.5 flex-1 bg-gray-300 -mt-4" />
+        <View style={{ height: 2, flex: 1, backgroundColor: '#d1d5db', marginTop: -16 }} />
 
         {/* Jar */}
-        <View className="items-center flex-1">
-          <View className="w-8 h-8 rounded-full bg-sprout-200 items-center justify-center">
+        <View style={{ alignItems: 'center', flex: 1 }}>
+          <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: '#97C459', alignItems: 'center', justifyContent: 'center' }}>
             <Text>🫙</Text>
           </View>
-          <Text className="text-xs text-gray-600 mt-1">Jar</Text>
-          <Text className="text-xs font-medium text-sprout-600">{formatDate(jarDate)}</Text>
+          <Text style={{ fontSize: 12, color: '#4b5563', marginTop: 4 }}>Jar</Text>
+          <Text style={{ fontSize: 12, fontWeight: '500', color: '#3B6D11' }}>{formatDate(jarDate)}</Text>
         </View>
 
         {/* Line */}
-        <View className="h-0.5 flex-1 bg-gray-300 -mt-4" />
+        <View style={{ height: 2, flex: 1, backgroundColor: '#d1d5db', marginTop: -16 }} />
 
         {/* Harvest */}
-        <View className="items-center flex-1">
-          <View className="w-8 h-8 rounded-full bg-harvest-200 items-center justify-center">
+        <View style={{ alignItems: 'center', flex: 1 }}>
+          <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: '#97C459', alignItems: 'center', justifyContent: 'center' }}>
             <Text>🎉</Text>
           </View>
-          <Text className="text-xs text-gray-600 mt-1">Harvest</Text>
-          <Text className="text-xs font-medium text-harvest-600">{formatDate(harvestDate)}</Text>
+          <Text style={{ fontSize: 12, color: '#4b5563', marginTop: 4 }}>Harvest</Text>
+          <Text style={{ fontSize: 12, fontWeight: '500', color: '#3B6D11' }}>{formatDate(harvestDate)}</Text>
         </View>
       </View>
     </View>

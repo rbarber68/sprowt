@@ -1,4 +1,4 @@
-import { View, Text, Pressable, ScrollView, Alert } from 'react-native'
+import { View, Text, TouchableOpacity, ScrollView, Alert } from 'react-native'
 import { useState } from 'react'
 import { router } from 'expo-router'
 import { uuidv4 } from '@/lib/uuid'
@@ -40,44 +40,65 @@ export default function PlannerScreen() {
   }
 
   return (
-    <View className="flex-1 bg-white">
+    <View style={{ flex: 1, backgroundColor: '#ffffff' }}>
       {/* Tab selector */}
-      <View className="flex-row border-b border-gray-200">
-        <Pressable
-          className={`flex-1 py-3 items-center ${tab === 'planner' ? 'border-b-2 border-sprout-600' : ''}`}
+      <View style={{ flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: '#e5e7eb' }}>
+        <TouchableOpacity
+          activeOpacity={0.7}
+          style={{
+            flex: 1,
+            paddingVertical: 12,
+            alignItems: 'center',
+            borderBottomWidth: tab === 'planner' ? 2 : 0,
+            borderBottomColor: tab === 'planner' ? '#3B6D11' : 'transparent',
+          }}
           onPress={() => setTab('planner')}
         >
-          <Text className={tab === 'planner' ? 'font-bold text-sprout-600' : 'text-gray-500'}>
+          <Text style={{ fontWeight: tab === 'planner' ? 'bold' : '400', color: tab === 'planner' ? '#3B6D11' : '#6b7280' }}>
             Planner
           </Text>
-        </Pressable>
-        <Pressable
-          className={`flex-1 py-3 items-center ${tab === 'stagger' ? 'border-b-2 border-sprout-600' : ''}`}
+        </TouchableOpacity>
+        <TouchableOpacity
+          activeOpacity={0.7}
+          style={{
+            flex: 1,
+            paddingVertical: 12,
+            alignItems: 'center',
+            borderBottomWidth: tab === 'stagger' ? 2 : 0,
+            borderBottomColor: tab === 'stagger' ? '#3B6D11' : 'transparent',
+          }}
           onPress={() => setTab('stagger')}
         >
-          <Text className={tab === 'stagger' ? 'font-bold text-sprout-600' : 'text-gray-500'}>
+          <Text style={{ fontWeight: tab === 'stagger' ? 'bold' : '400', color: tab === 'stagger' ? '#3B6D11' : '#6b7280' }}>
             Stagger
           </Text>
-        </Pressable>
+        </TouchableOpacity>
       </View>
 
       {tab === 'planner' ? (
-        <ScrollView className="flex-1 px-4 pt-4">
+        <ScrollView style={{ flex: 1, paddingHorizontal: 16, paddingTop: 16 }} contentContainerStyle={{ paddingBottom: 32 }}>
           {/* Sprout selector chips */}
-          <Text className="text-sm font-medium text-gray-500 mb-2">Select a sprout type</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-4">
+          <Text style={{ fontSize: 14, fontWeight: '500', color: '#6b7280', marginBottom: 8 }}>Select a sprout type</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 16 }}>
             {jarSprouts.map(s => (
-              <Pressable
+              <TouchableOpacity
                 key={s.id}
-                className={`mr-2 px-3 py-2 rounded-chip border ${
-                  selectedBeanId === s.id ? 'bg-sprout-600 border-sprout-600' : 'bg-white border-gray-200'
-                }`}
+                activeOpacity={0.7}
+                style={{
+                  marginRight: 8,
+                  paddingHorizontal: 12,
+                  paddingVertical: 8,
+                  borderRadius: 9999,
+                  borderWidth: 1,
+                  backgroundColor: selectedBeanId === s.id ? '#3B6D11' : '#ffffff',
+                  borderColor: selectedBeanId === s.id ? '#3B6D11' : '#e5e7eb',
+                }}
                 onPress={() => { setSelectedBeanId(s.id); setSelectedHarvestOffset(null) }}
               >
-                <Text className={selectedBeanId === s.id ? 'text-white text-sm' : 'text-gray-600 text-sm'}>
+                <Text style={{ color: selectedBeanId === s.id ? '#ffffff' : '#4b5563', fontSize: 14 }}>
                   {s.emoji} {s.name}
                 </Text>
-              </Pressable>
+              </TouchableOpacity>
             ))}
           </ScrollView>
 
@@ -93,94 +114,114 @@ export default function PlannerScreen() {
               />
 
               {/* Plan summary */}
-              <View className="bg-gray-50 rounded-card p-4 mt-4">
-                <Text className="text-sm font-medium text-sprout-800 mb-2">Plan Summary</Text>
-                <Text className="text-sm text-gray-600">
+              <View style={{ backgroundColor: '#f9fafb', borderRadius: 12, padding: 16, marginTop: 16 }}>
+                <Text style={{ fontSize: 14, fontWeight: '500', color: '#27500A', marginBottom: 8 }}>Plan Summary</Text>
+                <Text style={{ fontSize: 14, color: '#4b5563' }}>
                   Soak: {selectedBean.soakHours}h → Grow: {selectedBean.growDays}d → {selectedBean.rinsesPerDay} rinses/day
                 </Text>
-                <Text className="text-sm text-gray-600 mt-1">
+                <Text style={{ fontSize: 14, color: '#4b5563', marginTop: 4 }}>
                   Temp: {selectedBean.minTempF}–{selectedBean.maxTempF}°F · Light: {selectedBean.lightPreference}
                 </Text>
               </View>
 
-              <Pressable
-                className="bg-sprout-600 py-4 rounded-card items-center mt-4"
+              <TouchableOpacity
+                activeOpacity={0.7}
+                style={{ backgroundColor: '#3B6D11', paddingVertical: 16, borderRadius: 12, alignItems: 'center', marginTop: 16 }}
                 onPress={() => router.push({ pathname: '/batch/new', params: { beanTypeId: selectedBean.id } })}
               >
-                <Text className="text-white font-bold text-lg">Start This Batch</Text>
-              </Pressable>
+                <Text style={{ color: '#ffffff', fontWeight: 'bold', fontSize: 18 }}>Start This Batch</Text>
+              </TouchableOpacity>
             </>
           )}
 
           {!selectedBean && (
-            <View className="items-center py-12">
-              <Text className="text-5xl mb-4">📅</Text>
-              <Text className="text-gray-400 text-center">
+            <View style={{ alignItems: 'center', paddingVertical: 48 }}>
+              <Text style={{ fontSize: 48, marginBottom: 16 }}>📅</Text>
+              <Text style={{ color: '#9ca3af', textAlign: 'center' }}>
                 Pick a sprout type above to see the harvest timeline.
               </Text>
             </View>
           )}
 
-          <View className="h-8" />
+          <View style={{ height: 32 }} />
         </ScrollView>
       ) : (
-        <ScrollView className="flex-1 px-4 pt-4">
-          <Text className="text-lg font-bold text-sprout-800 mb-2">
+        <ScrollView style={{ flex: 1, paddingHorizontal: 16, paddingTop: 16 }} contentContainerStyle={{ paddingBottom: 32 }}>
+          <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#27500A', marginBottom: 8 }}>
             Fresh sprouts every...
           </Text>
 
           {/* Cadence selector */}
-          <View className="flex-row gap-2 mb-4">
+          <View style={{ flexDirection: 'row', gap: 8, marginBottom: 16 }}>
             {CADENCE_OPTIONS.map(c => (
-              <Pressable
+              <TouchableOpacity
                 key={c}
-                className={`flex-1 py-3 rounded-card items-center border ${
-                  cadence === c ? 'bg-sprout-600 border-sprout-600' : 'border-gray-200'
-                }`}
+                activeOpacity={0.7}
+                style={{
+                  flex: 1,
+                  paddingVertical: 12,
+                  borderRadius: 12,
+                  alignItems: 'center',
+                  borderWidth: 1,
+                  backgroundColor: cadence === c ? '#3B6D11' : '#ffffff',
+                  borderColor: cadence === c ? '#3B6D11' : '#e5e7eb',
+                }}
                 onPress={() => { setCadence(c); setStaggerPlan([]) }}
               >
-                <Text className={cadence === c ? 'text-white font-bold' : 'text-gray-600'}>
+                <Text style={{ color: cadence === c ? '#ffffff' : '#4b5563', fontWeight: cadence === c ? 'bold' : '400' }}>
                   {c}d
                 </Text>
-              </Pressable>
+              </TouchableOpacity>
             ))}
           </View>
 
           {/* Bean type multi-select */}
-          <Text className="text-sm font-medium text-gray-500 mb-2">Select 2+ sprout types</Text>
-          <View className="flex-row flex-wrap gap-2 mb-4">
+          <Text style={{ fontSize: 14, fontWeight: '500', color: '#6b7280', marginBottom: 8 }}>Select 2+ sprout types</Text>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
             {jarSprouts.map(s => (
-              <Pressable
+              <TouchableOpacity
                 key={s.id}
-                className={`px-3 py-2 rounded-chip border ${
-                  staggerBeanIds.includes(s.id) ? 'bg-sprout-100 border-sprout-400' : 'border-gray-200'
-                }`}
+                activeOpacity={0.7}
+                style={{
+                  paddingHorizontal: 12,
+                  paddingVertical: 8,
+                  borderRadius: 9999,
+                  borderWidth: 1,
+                  backgroundColor: staggerBeanIds.includes(s.id) ? '#C0DD97' : '#ffffff',
+                  borderColor: staggerBeanIds.includes(s.id) ? '#639922' : '#e5e7eb',
+                }}
                 onPress={() => toggleStaggerBean(s.id)}
               >
-                <Text className={staggerBeanIds.includes(s.id) ? 'text-sprout-800 text-sm' : 'text-gray-600 text-sm'}>
+                <Text style={{ color: staggerBeanIds.includes(s.id) ? '#27500A' : '#4b5563', fontSize: 14 }}>
                   {s.emoji} {s.name}
                 </Text>
-              </Pressable>
+              </TouchableOpacity>
             ))}
           </View>
 
           {/* Generate button */}
-          <Pressable
-            className={`py-3 rounded-card items-center mb-4 ${
-              staggerBeanIds.length >= 2 ? 'bg-sprout-600' : 'bg-gray-300'
-            }`}
+          <TouchableOpacity
+            activeOpacity={0.7}
+            style={{
+              paddingVertical: 12,
+              borderRadius: 12,
+              alignItems: 'center',
+              marginBottom: 16,
+              backgroundColor: staggerBeanIds.length >= 2 ? '#3B6D11' : '#d1d5db',
+            }}
             onPress={generatePlan}
             disabled={staggerBeanIds.length < 2}
           >
-            <Text className="text-white font-bold">Generate Plan</Text>
-          </Pressable>
+            <Text style={{ color: '#ffffff', fontWeight: 'bold' }}>Generate Plan</Text>
+          </TouchableOpacity>
 
           {/* Stagger calendar */}
           <StaggerCalendar plan={staggerPlan} />
 
           {staggerPlan.length > 0 && (
-            <Pressable
-              className="bg-sprout-600 py-4 rounded-card items-center mt-4"
+            <TouchableOpacity
+              activeOpacity={0.7}
+              style={{ backgroundColor: '#3B6D11', paddingVertical: 16, borderRadius: 12, alignItems: 'center', marginTop: 16 }}
               onPress={async () => {
                 Alert.alert(
                   'Activate stagger plan?',
@@ -246,13 +287,13 @@ export default function PlannerScreen() {
                 )
               }}
             >
-              <Text className="text-white font-bold text-lg">
+              <Text style={{ color: '#ffffff', fontWeight: 'bold', fontSize: 18 }}>
                 Activate Plan ({staggerPlan.length} batches)
               </Text>
-            </Pressable>
+            </TouchableOpacity>
           )}
 
-          <View className="h-8" />
+          <View style={{ height: 32 }} />
         </ScrollView>
       )}
     </View>

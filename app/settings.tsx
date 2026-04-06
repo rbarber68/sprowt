@@ -1,4 +1,4 @@
-import { View, Text, Pressable, ScrollView, TextInput, Alert } from 'react-native'
+import { View, Text, TouchableOpacity, ScrollView, TextInput, Alert } from 'react-native'
 import { useState, useEffect } from 'react'
 import { getKVStore, setKVStore, KV_KEYS } from '@/lib/kvstore'
 import { db } from '@/db/client'
@@ -145,8 +145,8 @@ export default function SettingsScreen() {
   }
 
   return (
-    <ScrollView className="flex-1 bg-white">
-      <View className="p-6">
+    <ScrollView style={{ flex: 1, backgroundColor: '#ffffff' }}>
+      <View style={{ padding: 24 }}>
         {/* View Mode */}
         <SettingSection title="View Mode">
           <ToggleRow
@@ -185,7 +185,7 @@ export default function SettingsScreen() {
             activeLabel="On"
             inactiveLabel="Off"
           />
-          <View className="h-3" />
+          <View style={{ height: 12 }} />
           <ToggleRow
             label={ttsEnabled ? 'Character Voice On' : 'Character Voice Off'}
             description="Characters read messages aloud with unique voices"
@@ -201,26 +201,38 @@ export default function SettingsScreen() {
         </SettingSection>
 
         <SettingSection title="Coach Intensity">
-          <Text className="text-xs text-gray-400 mb-3">How often should the Genie send proactive tips?</Text>
-          <View className="flex-row gap-2">
+          <Text style={{ fontSize: 12, color: '#9ca3af', marginBottom: 12 }}>How often should the Genie send proactive tips?</Text>
+          <View style={{ flexDirection: 'row', gap: 8 }}>
             {(['minimal', 'moderate', 'full'] as const).map(level => (
-              <Pressable
+              <TouchableOpacity
                 key={level}
-                className={`flex-1 py-3 rounded-card items-center border ${
-                  coachIntensity === level ? 'bg-sprout-600 border-sprout-600' : 'border-gray-200'
-                }`}
+                activeOpacity={0.7}
+                style={{
+                  flex: 1,
+                  paddingVertical: 12,
+                  borderRadius: 12,
+                  alignItems: 'center',
+                  borderWidth: 1,
+                  backgroundColor: coachIntensity === level ? '#3B6D11' : 'transparent',
+                  borderColor: coachIntensity === level ? '#3B6D11' : '#e5e7eb',
+                }}
                 onPress={() => {
                   setCoachIntensity(level)
                   setKVStore(KV_KEYS.COACH_INTENSITY, level)
                 }}
               >
-                <Text className={coachIntensity === level ? 'text-white font-bold text-sm capitalize' : 'text-gray-600 text-sm capitalize'}>
+                <Text style={{
+                  color: coachIntensity === level ? '#ffffff' : '#4b5563',
+                  fontWeight: coachIntensity === level ? '700' : '400',
+                  fontSize: 14,
+                  textTransform: 'capitalize',
+                }}>
                   {level}
                 </Text>
-              </Pressable>
+              </TouchableOpacity>
             ))}
           </View>
-          <Text className="text-xs text-gray-400 mt-2">
+          <Text style={{ fontSize: 12, color: '#9ca3af', marginTop: 8 }}>
             {coachIntensity === 'minimal' && 'Rinse + harvest + risk alerts only'}
             {coachIntensity === 'moderate' && '+ Morning briefing + daily tips'}
             {coachIntensity === 'full' && '+ Real-time coaching, patterns, performance nudges'}
@@ -229,43 +241,48 @@ export default function SettingsScreen() {
 
         <SettingSection title="My Containers">
           {containerList.map(c => (
-            <View key={c.id} className="flex-row items-center justify-between py-2 border-b border-gray-50">
+            <View key={c.id} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: '#f9fafb' }}>
               <View>
-                <Text className="text-sm font-medium text-gray-700">{c.name}</Text>
-                <Text className="text-xs text-gray-400">{c.capacityOz > 0 ? `${c.capacityOz}oz` : 'Flat tray'}</Text>
+                <Text style={{ fontSize: 14, fontWeight: '500', color: '#374151' }}>{c.name}</Text>
+                <Text style={{ fontSize: 12, color: '#9ca3af' }}>{c.capacityOz > 0 ? `${c.capacityOz}oz` : 'Flat tray'}</Text>
               </View>
-              <Pressable
-                className="px-3 py-1 rounded border border-gray-200"
+              <TouchableOpacity
+                activeOpacity={0.7}
+                style={{ paddingHorizontal: 12, paddingVertical: 4, borderRadius: 4, borderWidth: 1, borderColor: '#e5e7eb' }}
                 onPress={async () => {
                   await deleteContainer(c.id)
                   getAllContainers().then(setContainerList)
                 }}
               >
-                <Text className="text-xs text-gray-500">Remove</Text>
-              </Pressable>
+                <Text style={{ fontSize: 12, color: '#6b7280' }}>Remove</Text>
+              </TouchableOpacity>
             </View>
           ))}
-          <Text className="text-xs text-gray-400 mt-2">Add new containers when creating a batch.</Text>
+          <Text style={{ fontSize: 12, color: '#9ca3af', marginTop: 8 }}>Add new containers when creating a batch.</Text>
         </SettingSection>
 
         {/* Rinse Times */}
         <SettingSection title="Default Rinse Times">
-          <View className="gap-3 mb-3">
+          <View style={{ gap: 12, marginBottom: 12 }}>
             <TimeInput label="Morning" value={rinseTime1} onChange={setRinseTime1} />
             <TimeInput label="Afternoon" value={rinseTime2} onChange={setRinseTime2} />
             <TimeInput label="Night" value={rinseTime3} onChange={setRinseTime3} />
           </View>
-          <Pressable className="bg-sprout-600 py-2.5 rounded-card items-center" onPress={saveRinseTimes}>
-            <Text className="text-white font-medium">Save Times</Text>
-          </Pressable>
+          <TouchableOpacity
+            activeOpacity={0.7}
+            style={{ backgroundColor: '#3B6D11', paddingVertical: 10, borderRadius: 12, alignItems: 'center' }}
+            onPress={saveRinseTimes}
+          >
+            <Text style={{ color: '#ffffff', fontWeight: '500' }}>Save Times</Text>
+          </TouchableOpacity>
         </SettingSection>
 
         {/* Gemma API Key */}
         <SettingSection title="Gemma API Key">
-          <Text className="text-xs text-gray-400 mb-2">Google AI Studio API key for AI features</Text>
-          <View className="flex-row gap-2 mb-3">
+          <Text style={{ fontSize: 12, color: '#9ca3af', marginBottom: 8 }}>Google AI Studio API key for AI features</Text>
+          <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
             <TextInput
-              className="flex-1 bg-gray-100 rounded-card px-4 py-2.5 text-sm"
+              style={{ flex: 1, backgroundColor: '#f3f4f6', borderRadius: 12, paddingHorizontal: 16, paddingVertical: 10, fontSize: 14 }}
               value={showApiKey ? apiKey : apiKey ? '••••••••' : ''}
               onChangeText={setApiKey}
               placeholder="Paste API key"
@@ -275,31 +292,37 @@ export default function SettingsScreen() {
               onBlur={() => setShowApiKey(false)}
             />
           </View>
-          <Pressable className="bg-info-50 border border-info-200 py-2.5 rounded-card items-center" onPress={saveApiKey}>
-            <Text className="text-info-600 font-medium">Save Key</Text>
-          </Pressable>
+          <TouchableOpacity
+            activeOpacity={0.7}
+            style={{ backgroundColor: '#E6F1FB', borderWidth: 1, borderColor: '#85B7EB', paddingVertical: 10, borderRadius: 12, alignItems: 'center' }}
+            onPress={saveApiKey}
+          >
+            <Text style={{ color: '#185FA5', fontWeight: '500' }}>Save Key</Text>
+          </TouchableOpacity>
         </SettingSection>
 
         {/* Data Export/Import */}
         <SettingSection title="Data">
-          <Pressable
-            className="bg-sprout-50 border border-sprout-200 py-3 rounded-card items-center mb-3"
+          <TouchableOpacity
+            activeOpacity={0.7}
+            style={{ backgroundColor: '#EAF3DE', borderWidth: 1, borderColor: '#97C459', paddingVertical: 12, borderRadius: 12, alignItems: 'center', marginBottom: 12 }}
             onPress={exportData}
           >
-            <Text className="text-sprout-600 font-medium">Export All Data (JSON)</Text>
-          </Pressable>
-          <Pressable
-            className="bg-gray-100 border border-gray-200 py-3 rounded-card items-center"
+            <Text style={{ color: '#3B6D11', fontWeight: '500' }}>Export All Data (JSON)</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            activeOpacity={0.7}
+            style={{ backgroundColor: '#f3f4f6', borderWidth: 1, borderColor: '#e5e7eb', paddingVertical: 12, borderRadius: 12, alignItems: 'center' }}
             onPress={importData}
           >
-            <Text className="text-gray-600 font-medium">Import Backup</Text>
-          </Pressable>
+            <Text style={{ color: '#4b5563', fontWeight: '500' }}>Import Backup</Text>
+          </TouchableOpacity>
         </SettingSection>
 
         {/* About */}
         <SettingSection title="About">
-          <Text className="text-gray-600">SproutPal v1.0.0</Text>
-          <Text className="text-xs text-gray-400 mt-1">Grow better sprouts with your sprout crew.</Text>
+          <Text style={{ color: '#4b5563' }}>SproutPal v1.0.0</Text>
+          <Text style={{ fontSize: 12, color: '#9ca3af', marginTop: 4 }}>Grow better sprouts with your sprout crew.</Text>
         </SettingSection>
       </View>
     </ScrollView>
@@ -308,8 +331,8 @@ export default function SettingsScreen() {
 
 function SettingSection({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <View className="mb-6 pb-6 border-b border-gray-100">
-      <Text className="text-lg font-semibold text-sprout-800 mb-3">{title}</Text>
+    <View style={{ marginBottom: 24, paddingBottom: 24, borderBottomWidth: 1, borderBottomColor: '#f3f4f6' }}>
+      <Text style={{ fontSize: 18, fontWeight: '600', color: '#27500A', marginBottom: 12 }}>{title}</Text>
       {children}
     </View>
   )
@@ -331,29 +354,30 @@ function ToggleRow({
   inactiveLabel: string
 }) {
   return (
-    <View className="flex-row justify-between items-center">
-      <View className="flex-1 mr-4">
-        <Text className="font-medium text-gray-700">{label}</Text>
-        <Text className="text-xs text-gray-400">{description}</Text>
+    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+      <View style={{ flex: 1, marginRight: 16 }}>
+        <Text style={{ fontWeight: '500', color: '#374151' }}>{label}</Text>
+        <Text style={{ fontSize: 12, color: '#9ca3af' }}>{description}</Text>
       </View>
-      <Pressable
-        className={`px-4 py-2 rounded-chip ${active ? 'bg-sprout-600' : 'bg-gray-300'}`}
+      <TouchableOpacity
+        activeOpacity={0.7}
+        style={{ paddingHorizontal: 16, paddingVertical: 8, borderRadius: 9999, backgroundColor: active ? '#3B6D11' : '#d1d5db' }}
         onPress={onToggle}
       >
-        <Text className="text-white text-xs font-medium">
+        <Text style={{ color: '#ffffff', fontSize: 12, fontWeight: '500' }}>
           {active ? activeLabel : inactiveLabel}
         </Text>
-      </Pressable>
+      </TouchableOpacity>
     </View>
   )
 }
 
 function TimeInput({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
   return (
-    <View className="flex-row items-center justify-between">
-      <Text className="text-sm text-gray-600">{label}</Text>
+    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+      <Text style={{ fontSize: 14, color: '#4b5563' }}>{label}</Text>
       <TextInput
-        className="bg-gray-100 rounded-card px-4 py-2 text-sm w-24 text-center"
+        style={{ backgroundColor: '#f3f4f6', borderRadius: 12, paddingHorizontal: 16, paddingVertical: 8, fontSize: 14, width: 96, textAlign: 'center' }}
         value={value}
         onChangeText={onChange}
         placeholder="HH:MM"

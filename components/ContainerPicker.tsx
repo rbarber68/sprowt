@@ -3,7 +3,7 @@
  * Dropdown of user containers + inline "Add new" form
  */
 
-import { View, Text, Pressable, TextInput, ScrollView } from 'react-native'
+import { View, Text, TouchableOpacity, TextInput, ScrollView } from 'react-native'
 import { useState, useEffect } from 'react'
 import { getAllContainers, addContainer } from '@/lib/containers'
 import type { containers } from '@/db/schema'
@@ -45,76 +45,120 @@ export function ContainerPicker({ selectedId, onSelect, yieldHint }: ContainerPi
 
   return (
     <View>
-      <Text className="text-sm font-medium text-gray-500 mb-2">Container</Text>
+      <Text style={{ fontSize: 14, fontWeight: '500', color: '#6b7280', marginBottom: 8 }}>Container</Text>
 
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-2">
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 8 }}>
         {containerList.map(c => (
-          <Pressable
+          <TouchableOpacity
             key={c.id}
-            className={`mr-2 px-3 py-2 rounded-chip border ${
-              selectedId === c.id ? 'bg-sprout-600 border-sprout-600' : 'bg-white border-gray-200'
-            }`}
+            activeOpacity={0.7}
+            style={{
+              marginRight: 8,
+              paddingHorizontal: 12,
+              paddingVertical: 8,
+              borderRadius: 20,
+              borderWidth: 1,
+              backgroundColor: selectedId === c.id ? '#3B6D11' : '#ffffff',
+              borderColor: selectedId === c.id ? '#3B6D11' : '#e5e7eb',
+            }}
             onPress={() => onSelect(selectedId === c.id ? null : c.id)}
           >
-            <Text className={selectedId === c.id ? 'text-white text-sm' : 'text-gray-600 text-sm'}>
+            <Text style={{ color: selectedId === c.id ? '#ffffff' : '#4b5563', fontSize: 14 }}>
               {c.name}
             </Text>
-            <Text className={selectedId === c.id ? 'text-white/70 text-xs' : 'text-gray-400 text-xs'}>
+            <Text style={{ color: selectedId === c.id ? 'rgba(255,255,255,0.7)' : '#9ca3af', fontSize: 12 }}>
               {c.capacityOz > 0 ? `${c.capacityOz}oz` : 'flat'}
             </Text>
-          </Pressable>
+          </TouchableOpacity>
         ))}
-        <Pressable
-          className="px-3 py-2 rounded-chip border border-dashed border-sprout-400"
+        <TouchableOpacity
+          activeOpacity={0.7}
+          style={{
+            paddingHorizontal: 12,
+            paddingVertical: 8,
+            borderRadius: 20,
+            borderWidth: 1,
+            borderStyle: 'dashed',
+            borderColor: '#639922',
+          }}
           onPress={() => setShowAddNew(!showAddNew)}
         >
-          <Text className="text-sprout-600 text-sm">+ New</Text>
-        </Pressable>
+          <Text style={{ color: '#3B6D11', fontSize: 14 }}>+ New</Text>
+        </TouchableOpacity>
       </ScrollView>
 
       {yieldHint && (
-        <View className="bg-sprout-50 rounded-card p-2 mb-2">
-          <Text className="text-xs text-sprout-600">{yieldHint}</Text>
+        <View style={{ backgroundColor: '#EAF3DE', borderRadius: 12, padding: 8, marginBottom: 8 }}>
+          <Text style={{ fontSize: 12, color: '#3B6D11' }}>{yieldHint}</Text>
         </View>
       )}
 
       {showAddNew && (
-        <View className="bg-gray-50 rounded-card p-3 mb-2">
+        <View style={{ backgroundColor: '#f9fafb', borderRadius: 12, padding: 12, marginBottom: 8 }}>
           <TextInput
-            className="bg-white rounded-card px-3 py-2 text-sm mb-2 border border-gray-200"
+            style={{
+              backgroundColor: '#ffffff',
+              borderRadius: 12,
+              paddingHorizontal: 12,
+              paddingVertical: 8,
+              fontSize: 14,
+              marginBottom: 8,
+              borderWidth: 1,
+              borderColor: '#e5e7eb',
+            }}
             placeholder="Container name"
             value={newName}
             onChangeText={setNewName}
             placeholderTextColor="#999"
           />
-          <View className="flex-row gap-2 mb-2">
+          <View style={{ flexDirection: 'row', gap: 8, marginBottom: 8 }}>
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               {CONTAINER_TYPES.map(t => (
-                <Pressable
+                <TouchableOpacity
                   key={t.value}
-                  className={`mr-1 px-2 py-1 rounded border ${
-                    newType === t.value ? 'bg-sprout-100 border-sprout-400' : 'border-gray-200'
-                  }`}
+                  activeOpacity={0.7}
+                  style={{
+                    marginRight: 4,
+                    paddingHorizontal: 8,
+                    paddingVertical: 4,
+                    borderRadius: 4,
+                    borderWidth: 1,
+                    backgroundColor: newType === t.value ? '#C0DD97' : 'transparent',
+                    borderColor: newType === t.value ? '#639922' : '#e5e7eb',
+                  }}
                   onPress={() => setNewType(t.value)}
                 >
-                  <Text className="text-xs">{t.label}</Text>
-                </Pressable>
+                  <Text style={{ fontSize: 12 }}>{t.label}</Text>
+                </TouchableOpacity>
               ))}
             </ScrollView>
           </View>
-          <View className="flex-row gap-2 items-center">
+          <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
             <TextInput
-              className="bg-white rounded-card px-3 py-2 text-sm border border-gray-200 w-20"
+              style={{
+                backgroundColor: '#ffffff',
+                borderRadius: 12,
+                paddingHorizontal: 12,
+                paddingVertical: 8,
+                fontSize: 14,
+                borderWidth: 1,
+                borderColor: '#e5e7eb',
+                width: 80,
+              }}
               placeholder="oz"
               value={newCapacity}
               onChangeText={setNewCapacity}
               keyboardType="numeric"
               placeholderTextColor="#999"
             />
-            <Text className="text-xs text-gray-400">oz capacity</Text>
-            <Pressable className="ml-auto bg-sprout-600 px-4 py-2 rounded-chip" onPress={handleAddNew}>
-              <Text className="text-white text-sm font-medium">Add</Text>
-            </Pressable>
+            <Text style={{ fontSize: 12, color: '#9ca3af' }}>oz capacity</Text>
+            <TouchableOpacity
+              activeOpacity={0.7}
+              style={{ marginLeft: 'auto', backgroundColor: '#3B6D11', paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20 }}
+              onPress={handleAddNew}
+            >
+              <Text style={{ color: '#ffffff', fontSize: 14, fontWeight: '500' }}>Add</Text>
+            </TouchableOpacity>
           </View>
         </View>
       )}

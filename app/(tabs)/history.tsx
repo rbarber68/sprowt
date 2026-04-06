@@ -1,4 +1,4 @@
-import { View, Text, Pressable, ScrollView } from 'react-native'
+import { View, Text, TouchableOpacity, ScrollView } from 'react-native'
 import { useFocusEffect, router } from 'expo-router'
 import { useState, useCallback } from 'react'
 import { db } from '@/db/client'
@@ -35,33 +35,54 @@ export default function HistoryScreen() {
   }
 
   return (
-    <View className="flex-1 bg-white">
+    <View style={{ flex: 1, backgroundColor: '#ffffff' }}>
       {/* Tab selector */}
-      <View className="flex-row border-b border-gray-200">
-        <Pressable
-          className={`flex-1 py-3 items-center ${tab === 'history' ? 'border-b-2 border-sprout-600' : ''}`}
+      <View style={{ flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: '#e5e7eb' }}>
+        <TouchableOpacity
+          activeOpacity={0.7}
+          style={{
+            flex: 1,
+            paddingVertical: 12,
+            alignItems: 'center',
+            borderBottomWidth: tab === 'history' ? 2 : 0,
+            borderBottomColor: tab === 'history' ? '#3B6D11' : 'transparent',
+          }}
           onPress={() => setTab('history')}
         >
-          <Text className={tab === 'history' ? 'font-bold text-sprout-600' : 'text-gray-500'}>
+          <Text style={{ fontWeight: tab === 'history' ? 'bold' : '400', color: tab === 'history' ? '#3B6D11' : '#6b7280' }}>
             History
           </Text>
-        </Pressable>
-        <Pressable
-          className={`flex-1 py-3 items-center ${tab === 'feedback' ? 'border-b-2 border-sprout-600' : ''}`}
+        </TouchableOpacity>
+        <TouchableOpacity
+          activeOpacity={0.7}
+          style={{
+            flex: 1,
+            paddingVertical: 12,
+            alignItems: 'center',
+            borderBottomWidth: tab === 'feedback' ? 2 : 0,
+            borderBottomColor: tab === 'feedback' ? '#3B6D11' : 'transparent',
+          }}
           onPress={() => setTab('feedback')}
         >
-          <Text className={tab === 'feedback' ? 'font-bold text-sprout-600' : 'text-gray-500'}>
+          <Text style={{ fontWeight: tab === 'feedback' ? 'bold' : '400', color: tab === 'feedback' ? '#3B6D11' : '#6b7280' }}>
             Seed Feedback
           </Text>
-        </Pressable>
-        <Pressable
-          className={`flex-1 py-3 items-center ${tab === 'performance' ? 'border-b-2 border-sprout-600' : ''}`}
+        </TouchableOpacity>
+        <TouchableOpacity
+          activeOpacity={0.7}
+          style={{
+            flex: 1,
+            paddingVertical: 12,
+            alignItems: 'center',
+            borderBottomWidth: tab === 'performance' ? 2 : 0,
+            borderBottomColor: tab === 'performance' ? '#3B6D11' : 'transparent',
+          }}
           onPress={() => setTab('performance')}
         >
-          <Text className={tab === 'performance' ? 'font-bold text-sprout-600' : 'text-gray-500'}>
+          <Text style={{ fontWeight: tab === 'performance' ? 'bold' : '400', color: tab === 'performance' ? '#3B6D11' : '#6b7280' }}>
             Performance
           </Text>
-        </Pressable>
+        </TouchableOpacity>
       </View>
 
       {tab === 'history' ? (
@@ -86,10 +107,10 @@ export default function HistoryScreen() {
 function HistoryTab({ batches: archivedBatches }: { batches: HistoryRow[] }) {
   if (archivedBatches.length === 0) {
     return (
-      <View className="flex-1 items-center justify-center p-6">
-        <Text className="text-5xl mb-4">📋</Text>
-        <Text className="text-xl font-bold text-sprout-800 mb-2">No harvest history yet</Text>
-        <Text className="text-gray-500 text-center">
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+        <Text style={{ fontSize: 48, marginBottom: 16 }}>📋</Text>
+        <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#27500A', marginBottom: 8 }}>No harvest history yet</Text>
+        <Text style={{ color: '#6b7280', textAlign: 'center' }}>
           Your harvest archive will appear here after you complete your first batch.
         </Text>
       </View>
@@ -97,41 +118,42 @@ function HistoryTab({ batches: archivedBatches }: { batches: HistoryRow[] }) {
   }
 
   return (
-    <ScrollView className="flex-1">
+    <ScrollView style={{ flex: 1 }} contentContainerStyle={{}}>
       {archivedBatches.map(row => {
         const b = row.batches
         const c = row.characters
         const bt = row.bean_types
 
         return (
-          <Pressable
+          <TouchableOpacity
             key={b.id}
-            className="flex-row items-center px-4 py-3 border-b border-gray-50"
+            activeOpacity={0.7}
+            style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#f9fafb' }}
             onPress={() => router.push({ pathname: '/batch/[id]', params: { id: b.id } })}
           >
-            <Text className="text-2xl mr-3">{bt.emoji}</Text>
-            <View className="flex-1">
-              <Text className="font-medium text-sprout-800">{c.name}</Text>
-              <Text className="text-xs text-gray-500">
+            <Text style={{ fontSize: 24, marginRight: 12 }}>{bt.emoji}</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontWeight: '500', color: '#27500A' }}>{c.name}</Text>
+              <Text style={{ fontSize: 12, color: '#6b7280' }}>
                 {bt.name} · {b.jarLabel} · {b.status}
               </Text>
             </View>
-            <View className="items-end">
+            <View style={{ alignItems: 'flex-end' }}>
               {b.actualHarvestAt && (
-                <Text className="text-xs text-gray-400">
+                <Text style={{ fontSize: 12, color: '#9ca3af' }}>
                   {new Date(b.actualHarvestAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                 </Text>
               )}
               {b.userRating && (
-                <Text className="text-xs text-soak-200">
+                <Text style={{ fontSize: 12, color: '#EF9F27' }}>
                   {'★'.repeat(b.userRating)}{'☆'.repeat(5 - b.userRating)}
                 </Text>
               )}
               {b.germinationPct !== null && b.germinationPct !== undefined && (
-                <Text className="text-xs text-gray-400">{b.germinationPct}% germ</Text>
+                <Text style={{ fontSize: 12, color: '#9ca3af' }}>{b.germinationPct}% germ</Text>
               )}
             </View>
-          </Pressable>
+          </TouchableOpacity>
         )
       })}
     </ScrollView>
@@ -143,41 +165,46 @@ function FeedbackTab({ batches: archivedBatches }: { batches: HistoryRow[] }) {
 
   if (harvestedCount < 3) {
     return (
-      <View className="flex-1 items-center justify-center p-6">
-        <Text className="text-5xl mb-4">📊</Text>
-        <Text className="text-xl font-bold text-sprout-800 mb-2">Unlock Adaptive Timing</Text>
-        <Text className="text-gray-500 text-center mb-4">
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+        <Text style={{ fontSize: 48, marginBottom: 16 }}>📊</Text>
+        <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#27500A', marginBottom: 8 }}>Unlock Adaptive Timing</Text>
+        <Text style={{ color: '#6b7280', textAlign: 'center', marginBottom: 16 }}>
           Log 3 batches to unlock personalized harvest timing.
         </Text>
         {/* Progress indicator */}
-        <View className="flex-row gap-2 items-center">
+        <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
           {[0, 1, 2].map(i => (
             <View
               key={i}
-              className={`w-8 h-8 rounded-full items-center justify-center ${
-                i < harvestedCount ? 'bg-sprout-400' : 'bg-gray-200'
-              }`}
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: 9999,
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: i < harvestedCount ? '#639922' : '#e5e7eb',
+              }}
             >
-              <Text className={i < harvestedCount ? 'text-white text-sm font-bold' : 'text-gray-400 text-sm'}>
+              <Text style={{ color: i < harvestedCount ? '#ffffff' : '#9ca3af', fontSize: 14, fontWeight: 'bold' }}>
                 {i + 1}
               </Text>
             </View>
           ))}
         </View>
-        <Text className="text-xs text-gray-400 mt-2">{harvestedCount} of 3 batches completed</Text>
+        <Text style={{ fontSize: 12, color: '#9ca3af', marginTop: 8 }}>{harvestedCount} of 3 batches completed</Text>
       </View>
     )
   }
 
   return (
-    <ScrollView className="flex-1 p-4">
-      <View className="bg-info-50 border border-info-200 rounded-card p-4 mb-4">
-        <Text className="text-sm font-medium text-info-600 mb-1">Adaptive Timing Active</Text>
-        <Text className="text-sm text-gray-600">
+    <ScrollView style={{ flex: 1, padding: 16 }} contentContainerStyle={{ padding: 16 }}>
+      <View style={{ backgroundColor: '#E6F1FB', borderWidth: 1, borderColor: '#85B7EB', borderRadius: 12, padding: 16, marginBottom: 16 }}>
+        <Text style={{ fontSize: 14, fontWeight: '500', color: '#185FA5', marginBottom: 4 }}>Adaptive Timing Active</Text>
+        <Text style={{ fontSize: 14, color: '#4b5563' }}>
           Your seed profiles are building. Timing adjustments will appear on new batches.
         </Text>
       </View>
-      <Text className="text-gray-400 text-center text-sm">
+      <Text style={{ color: '#9ca3af', textAlign: 'center', fontSize: 14 }}>
         Detailed seed feedback analysis coming with Gemma integration.
       </Text>
     </ScrollView>

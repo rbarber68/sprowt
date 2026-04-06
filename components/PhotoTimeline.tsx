@@ -3,7 +3,7 @@
  * 4 stage tabs: Day 0 (Soaking) / Day 2 (Sprouting) / Day 4 (Growing) / Harvest
  */
 
-import { View, Text, Pressable, Image } from 'react-native'
+import { View, Text, TouchableOpacity, Image } from 'react-native'
 import { useState } from 'react'
 
 const STAGES = [
@@ -28,68 +28,85 @@ export function PhotoTimeline({ photos = {}, stageNotes = {}, onAddPhoto }: Phot
   return (
     <View>
       {/* Stage tabs */}
-      <View className="flex-row mb-4">
+      <View style={{ flexDirection: 'row', marginBottom: 16 }}>
         {STAGES.map((stage) => {
           const hasStagePhoto = !!photos[stage.key]
           return (
-            <Pressable
+            <TouchableOpacity
               key={stage.key}
-              className={`flex-1 items-center py-2 mx-1 rounded-chip ${
-                activeStage === stage.key
-                  ? 'bg-sprout-200'
-                  : hasStagePhoto
-                  ? 'bg-sprout-50'
-                  : 'bg-gray-100'
-              }`}
+              activeOpacity={0.7}
+              style={{
+                flex: 1,
+                alignItems: 'center',
+                paddingVertical: 8,
+                marginHorizontal: 4,
+                borderRadius: 20,
+                backgroundColor:
+                  activeStage === stage.key
+                    ? '#97C459'
+                    : hasStagePhoto
+                    ? '#EAF3DE'
+                    : '#f3f4f6',
+              }}
               onPress={() => setActiveStage(stage.key)}
             >
               {hasStagePhoto ? (
-                <View className="w-6 h-6 rounded-full bg-sprout-400 items-center justify-center">
-                  <Text className="text-white text-xs">\u2713</Text>
+                <View style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: '#639922', alignItems: 'center', justifyContent: 'center' }}>
+                  <Text style={{ color: '#ffffff', fontSize: 12 }}>✓</Text>
                 </View>
               ) : (
-                <Text className="text-lg">{stage.emoji}</Text>
+                <Text style={{ fontSize: 18 }}>{stage.emoji}</Text>
               )}
-              <Text className="text-xs text-gray-600">{stage.label}</Text>
-            </Pressable>
+              <Text style={{ fontSize: 12, color: '#4b5563' }}>{stage.label}</Text>
+            </TouchableOpacity>
           )
         })}
       </View>
 
       {/* Photo display area */}
-      <View className="bg-gray-50 rounded-card items-center min-h-[160px] justify-center overflow-hidden">
+      <View style={{ backgroundColor: '#f9fafb', borderRadius: 12, alignItems: 'center', minHeight: 160, justifyContent: 'center', overflow: 'hidden' }}>
         {hasPhoto ? (
-          <View className="w-full">
+          <View style={{ width: '100%' }}>
             <Image
               source={{ uri: photos[activeStage]! }}
-              className="w-full h-40"
+              style={{ width: '100%', height: 160 }}
               resizeMode="cover"
             />
             {note && (
-              <View className="p-3">
-                <Text className="text-sm text-gray-600">{note}</Text>
+              <View style={{ padding: 12 }}>
+                <Text style={{ fontSize: 14, color: '#4b5563' }}>{note}</Text>
               </View>
             )}
-            <Pressable
-              className="absolute top-2 right-2 bg-white/80 px-2 py-1 rounded"
+            <TouchableOpacity
+              activeOpacity={0.7}
+              style={{
+                position: 'absolute',
+                top: 8,
+                right: 8,
+                backgroundColor: 'rgba(255,255,255,0.8)',
+                paddingHorizontal: 8,
+                paddingVertical: 4,
+                borderRadius: 4,
+              }}
               onPress={() => onAddPhoto?.(activeStage)}
             >
-              <Text className="text-xs text-gray-600">Retake</Text>
-            </Pressable>
+              <Text style={{ fontSize: 12, color: '#4b5563' }}>Retake</Text>
+            </TouchableOpacity>
           </View>
         ) : (
-          <View className="p-6 items-center">
-            <Text className="text-5xl mb-2">
+          <View style={{ padding: 24, alignItems: 'center' }}>
+            <Text style={{ fontSize: 48, marginBottom: 8 }}>
               {STAGES.find(s => s.key === activeStage)?.emoji}
             </Text>
-            <Text className="text-gray-400 mb-2">No photo yet</Text>
+            <Text style={{ color: '#9ca3af', marginBottom: 8 }}>No photo yet</Text>
             {onAddPhoto && (
-              <Pressable
-                className="bg-sprout-600 px-4 py-2 rounded-chip"
+              <TouchableOpacity
+                activeOpacity={0.7}
+                style={{ backgroundColor: '#3B6D11', paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20 }}
                 onPress={() => onAddPhoto(activeStage)}
               >
-                <Text className="text-white text-sm font-medium">Add photo</Text>
-              </Pressable>
+                <Text style={{ color: '#ffffff', fontSize: 14, fontWeight: '500' }}>Add photo</Text>
+              </TouchableOpacity>
             )}
           </View>
         )}

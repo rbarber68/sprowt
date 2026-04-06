@@ -3,7 +3,7 @@
  * Small speaker icon that reads text aloud in character voice
  */
 
-import { Pressable, Text } from 'react-native'
+import { TouchableOpacity, Text } from 'react-native'
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -52,20 +52,26 @@ export function SpeakButton({ text, personality, voiceStyle, size = 'sm' }: Spea
     }
   }
 
-  const sizeClass = size === 'md' ? 'w-10 h-10 rounded-full' : 'w-7 h-7 rounded-full'
+  const dimension = size === 'md' ? 40 : 28
 
   return (
     <Animated.View style={animStyle}>
-      <Pressable
-        className={`${sizeClass} items-center justify-center ${
-          speaking ? 'bg-sprout-200' : 'bg-gray-100'
-        }`}
+      <TouchableOpacity
+        activeOpacity={0.7}
+        style={{
+          width: dimension,
+          height: dimension,
+          borderRadius: 9999,
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: speaking ? '#97C459' : '#f3f4f6',
+        }}
         onPress={handlePress}
       >
         <Text style={{ fontSize: size === 'md' ? 18 : 13 }}>
           {speaking ? '\ud83d\udd0a' : '\ud83d\udd08'}
         </Text>
-      </Pressable>
+      </TouchableOpacity>
     </Animated.View>
   )
 }

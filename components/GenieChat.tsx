@@ -3,7 +3,7 @@
  * Bottom sheet chat UI with context-aware suggested questions
  */
 
-import { View, Text, Pressable, TextInput, ScrollView, KeyboardAvoidingView, Platform } from 'react-native'
+import { View, Text, TouchableOpacity, TextInput, ScrollView, KeyboardAvoidingView, Platform } from 'react-native'
 import { useState, useEffect, useRef } from 'react'
 import { chatWithGenie, getRecentMessages, summarizeAndPrune } from '@/lib/genie'
 
@@ -90,26 +90,26 @@ export function GenieChat({ visible, onClose, screenContext }: GenieChatProps) {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      className="absolute inset-0 bg-black/40 justify-end"
+      style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' }}
     >
-      <View className="bg-white rounded-t-3xl max-h-[80%] min-h-[50%]">
+      <View style={{ backgroundColor: '#ffffff', borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: '80%', minHeight: '50%' }}>
         {/* Header */}
-        <View className="flex-row justify-between items-center px-4 py-3 border-b border-gray-100">
-          <View className="flex-row items-center">
-            <Text className="text-xl mr-2">{'\ud83e\uddde'}</Text>
-            <Text className="text-lg font-bold text-sprout-800">Sprout Genie</Text>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#f3f4f6' }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Text style={{ fontSize: 20, marginRight: 8 }}>{'\ud83e\uddde'}</Text>
+            <Text style={{ fontSize: 18, fontWeight: '700', color: '#27500A' }}>Sprout Genie</Text>
           </View>
-          <Pressable onPress={handleClose} className="p-2">
-            <Text className="text-xl text-gray-400">{'\u2715'}</Text>
-          </Pressable>
+          <TouchableOpacity activeOpacity={0.7} onPress={handleClose} style={{ padding: 8 }}>
+            <Text style={{ fontSize: 20, color: '#9ca3af' }}>{'\u2715'}</Text>
+          </TouchableOpacity>
         </View>
 
         {/* Messages */}
-        <ScrollView ref={scrollRef} className="flex-1 px-4 py-2">
+        <ScrollView ref={scrollRef} style={{ flex: 1, paddingHorizontal: 16, paddingVertical: 8 }}>
           {messages.length === 0 && (
-            <View className="items-center py-8">
-              <Text className="text-4xl mb-2">{'\ud83e\uddde'}</Text>
-              <Text className="text-sprout-600 font-medium text-center">
+            <View style={{ alignItems: 'center', paddingVertical: 32 }}>
+              <Text style={{ fontSize: 36, marginBottom: 8 }}>{'\ud83e\uddde'}</Text>
+              <Text style={{ color: '#3B6D11', fontWeight: '500', textAlign: 'center' }}>
                 Welcome to The Great Sprout-Off!{'\n'}Ask me anything about your sprouts!
               </Text>
             </View>
@@ -117,23 +117,28 @@ export function GenieChat({ visible, onClose, screenContext }: GenieChatProps) {
           {messages.map(msg => (
             <View
               key={msg.id}
-              className={`mb-3 max-w-[85%] ${msg.role === 'user' ? 'self-end' : 'self-start'}`}
+              style={{ marginBottom: 12, maxWidth: '85%', alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start' }}
             >
-              <View className={`rounded-2xl px-4 py-2.5 ${
-                msg.role === 'user'
-                  ? 'bg-sprout-600 rounded-br-sm'
-                  : 'bg-info-50 border border-info-200 rounded-bl-sm'
-              }`}>
-                <Text className={msg.role === 'user' ? 'text-white text-sm' : 'text-gray-700 text-sm'}>
+              <View style={{
+                borderRadius: 16,
+                borderBottomRightRadius: msg.role === 'user' ? 4 : 16,
+                borderBottomLeftRadius: msg.role === 'user' ? 16 : 4,
+                paddingHorizontal: 16,
+                paddingVertical: 10,
+                backgroundColor: msg.role === 'user' ? '#3B6D11' : '#E6F1FB',
+                borderWidth: msg.role === 'user' ? 0 : 1,
+                borderColor: msg.role === 'user' ? undefined : '#85B7EB',
+              }}>
+                <Text style={{ color: msg.role === 'user' ? '#ffffff' : '#374151', fontSize: 14 }}>
                   {msg.content}
                 </Text>
               </View>
             </View>
           ))}
           {loading && (
-            <View className="self-start mb-3 max-w-[85%]">
-              <View className="bg-info-50 border border-info-200 rounded-2xl rounded-bl-sm px-4 py-2.5">
-                <Text className="text-gray-400 italic text-sm">The Genie is consulting the sprouts...</Text>
+            <View style={{ alignSelf: 'flex-start', marginBottom: 12, maxWidth: '85%' }}>
+              <View style={{ backgroundColor: '#E6F1FB', borderWidth: 1, borderColor: '#85B7EB', borderRadius: 16, borderBottomLeftRadius: 4, paddingHorizontal: 16, paddingVertical: 10 }}>
+                <Text style={{ color: '#9ca3af', fontStyle: 'italic', fontSize: 14 }}>The Genie is consulting the sprouts...</Text>
               </View>
             </View>
           )}
@@ -141,23 +146,24 @@ export function GenieChat({ visible, onClose, screenContext }: GenieChatProps) {
 
         {/* Suggested questions */}
         {messages.length < 2 && (
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} className="px-4 pb-2">
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ paddingHorizontal: 16, paddingBottom: 8 }}>
             {suggestions.map(q => (
-              <Pressable
+              <TouchableOpacity
                 key={q}
-                className="mr-2 px-3 py-1.5 rounded-chip bg-sprout-50 border border-sprout-200"
+                activeOpacity={0.7}
+                style={{ marginRight: 8, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 9999, backgroundColor: '#EAF3DE', borderWidth: 1, borderColor: '#97C459' }}
                 onPress={() => sendMessage(q)}
               >
-                <Text className="text-sprout-600 text-xs">{q}</Text>
-              </Pressable>
+                <Text style={{ color: '#3B6D11', fontSize: 12 }}>{q}</Text>
+              </TouchableOpacity>
             ))}
           </ScrollView>
         )}
 
         {/* Input */}
-        <View className="flex-row items-center px-4 py-3 border-t border-gray-100">
+        <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 12, borderTopWidth: 1, borderTopColor: '#f3f4f6' }}>
           <TextInput
-            className="flex-1 bg-gray-100 rounded-full px-4 py-2.5 text-sm mr-2"
+            style={{ flex: 1, backgroundColor: '#f3f4f6', borderRadius: 9999, paddingHorizontal: 16, paddingVertical: 10, fontSize: 14, marginRight: 8 }}
             placeholder="Ask the Genie..."
             value={input}
             onChangeText={setInput}
@@ -165,15 +171,21 @@ export function GenieChat({ visible, onClose, screenContext }: GenieChatProps) {
             placeholderTextColor="#999"
             editable={!loading}
           />
-          <Pressable
-            className={`w-10 h-10 rounded-full items-center justify-center ${
-              input.trim() && !loading ? 'bg-sprout-600' : 'bg-gray-300'
-            }`}
+          <TouchableOpacity
+            activeOpacity={0.7}
+            style={{
+              width: 40,
+              height: 40,
+              borderRadius: 9999,
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: input.trim() && !loading ? '#3B6D11' : '#d1d5db',
+            }}
             onPress={() => sendMessage(input)}
             disabled={!input.trim() || loading}
           >
-            <Text className="text-white font-bold">{'\u2191'}</Text>
-          </Pressable>
+            <Text style={{ color: '#ffffff', fontWeight: '700' }}>{'\u2191'}</Text>
+          </TouchableOpacity>
         </View>
       </View>
     </KeyboardAvoidingView>

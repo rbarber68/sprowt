@@ -3,7 +3,7 @@
  * Post-harvest celebration with recipes, nutritional highlights, and character celebration
  */
 
-import { View, Text, Pressable, ScrollView } from 'react-native'
+import { View, Text, TouchableOpacity, ScrollView } from 'react-native'
 import Animated, { FadeIn, FadeInDown, ZoomIn } from 'react-native-reanimated'
 import { useState } from 'react'
 import { router } from 'expo-router'
@@ -57,9 +57,9 @@ export function HarvestCelebration({
     : `Harvest complete! ${character.name} says: ${character.catchphrase}`
 
   return (
-    <ScrollView className="flex-1 bg-sprout-900" contentContainerStyle={{ paddingBottom: 40 }}>
+    <ScrollView style={{ flex: 1, backgroundColor: '#1a3a0a' }} contentContainerStyle={{ paddingBottom: 40 }}>
       {/* Celebration header */}
-      <Animated.View entering={ZoomIn.duration(500).springify()} className="items-center pt-8 pb-4">
+      <Animated.View entering={ZoomIn.duration(500).springify()} style={{ alignItems: 'center', paddingTop: 32, paddingBottom: 16 }}>
         <CharacterAvatar
           faceColor={character.faceColor}
           eyeColor={character.eyeColor}
@@ -69,45 +69,45 @@ export function HarvestCelebration({
           size={100}
           animation="celebrate"
         />
-        <Animated.Text entering={FadeInDown.delay(400).duration(400)} className="text-3xl font-bold text-white mt-4">
+        <Animated.Text entering={FadeInDown.delay(400).duration(400)} style={{ fontSize: 30, fontWeight: 'bold', color: '#ffffff', marginTop: 16 }}>
           {'\ud83c\udf89'} HARVEST COMPLETE! {'\ud83c\udf89'}
         </Animated.Text>
-        <Animated.Text entering={FadeInDown.delay(500).duration(400)} className="text-sprout-200 mt-1">
+        <Animated.Text entering={FadeInDown.delay(500).duration(400)} style={{ color: '#97C459', marginTop: 4 }}>
           {character.name}'s {sproutData?.name ?? 'sprout'} journey ends here
         </Animated.Text>
       </Animated.View>
 
       {/* Yield stats */}
       {yieldRatio && (
-        <Animated.View entering={FadeIn.delay(600).duration(400)} className="mx-6 mb-4">
-          <View className="bg-sprout-800/50 rounded-2xl p-5 flex-row justify-around">
-            <View className="items-center">
-              <Text className="text-2xl font-bold text-sprout-200">{seedAmountGrams}g</Text>
-              <Text className="text-xs text-sprout-400">Seed in</Text>
+        <Animated.View entering={FadeIn.delay(600).duration(400)} style={{ marginHorizontal: 24, marginBottom: 16 }}>
+          <View style={{ backgroundColor: 'rgba(39,80,10,0.5)', borderRadius: 16, padding: 20, flexDirection: 'row', justifyContent: 'space-around' }}>
+            <View style={{ alignItems: 'center' }}>
+              <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#97C459' }}>{seedAmountGrams}g</Text>
+              <Text style={{ fontSize: 12, color: '#639922' }}>Seed in</Text>
             </View>
-            <View className="items-center">
-              <Text className="text-2xl text-sprout-400">{'\u2192'}</Text>
+            <View style={{ alignItems: 'center' }}>
+              <Text style={{ fontSize: 24, color: '#639922' }}>{'\u2192'}</Text>
             </View>
-            <View className="items-center">
-              <Text className="text-2xl font-bold text-sprout-200">{harvestYieldGrams}g</Text>
-              <Text className="text-xs text-sprout-400">Harvested</Text>
+            <View style={{ alignItems: 'center' }}>
+              <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#97C459' }}>{harvestYieldGrams}g</Text>
+              <Text style={{ fontSize: 12, color: '#639922' }}>Harvested</Text>
             </View>
-            <View className="items-center">
-              <Text className="text-2xl font-bold text-soak-200">{yieldRatio.toFixed(1)}x</Text>
-              <Text className="text-xs text-sprout-400">Yield</Text>
+            <View style={{ alignItems: 'center' }}>
+              <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#EF9F27' }}>{yieldRatio.toFixed(1)}x</Text>
+              <Text style={{ fontSize: 12, color: '#639922' }}>Yield</Text>
             </View>
           </View>
         </Animated.View>
       )}
 
       {/* Character celebration + speak */}
-      <Animated.View entering={FadeIn.delay(700).duration(400)} className="mx-6 mb-4">
-        <View className="bg-sprout-800/50 rounded-2xl p-4">
-          <View className="flex-row items-center justify-between mb-2">
-            <Text className="text-sprout-200 font-medium">{character.name} says:</Text>
+      <Animated.View entering={FadeIn.delay(700).duration(400)} style={{ marginHorizontal: 24, marginBottom: 16 }}>
+        <View style={{ backgroundColor: 'rgba(39,80,10,0.5)', borderRadius: 16, padding: 16 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <Text style={{ color: '#97C459', fontWeight: '500' }}>{character.name} says:</Text>
             <SpeakButton text={celebrationText} personality={personality} voiceStyle={character.voiceStyle} size="md" />
           </View>
-          <Text className="text-white italic leading-5">
+          <Text style={{ color: '#ffffff', fontStyle: 'italic', lineHeight: 20 }}>
             "{gemmaMessage ?? character.catchphrase}"
           </Text>
         </View>
@@ -115,55 +115,59 @@ export function HarvestCelebration({
 
       {/* Nutritional highlights */}
       {sproutData && (
-        <Animated.View entering={FadeIn.delay(800).duration(400)} className="mx-6 mb-4">
-          <Text className="text-sprout-400 text-xs uppercase tracking-wider mb-2">Nutrition highlights</Text>
-          <View className="bg-info-800/30 border border-info-600/30 rounded-2xl p-4">
-            <Text className="text-info-200 text-sm leading-5">{sproutData.gemmaContext.slice(0, 200)}...</Text>
-            <Text className="text-soak-200 text-sm mt-2 italic">{sproutData.funFact}</Text>
+        <Animated.View entering={FadeIn.delay(800).duration(400)} style={{ marginHorizontal: 24, marginBottom: 16 }}>
+          <Text style={{ color: '#639922', fontSize: 12, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>Nutrition highlights</Text>
+          <View style={{ backgroundColor: 'rgba(24,95,165,0.3)', borderWidth: 1, borderColor: 'rgba(24,95,165,0.3)', borderRadius: 16, padding: 16 }}>
+            <Text style={{ color: '#85B7EB', fontSize: 14, lineHeight: 20 }}>{sproutData.gemmaContext.slice(0, 200)}...</Text>
+            <Text style={{ color: '#EF9F27', fontSize: 14, marginTop: 8, fontStyle: 'italic' }}>{sproutData.funFact}</Text>
           </View>
         </Animated.View>
       )}
 
       {/* Recipe suggestions */}
-      <Animated.View entering={FadeIn.delay(900).duration(400)} className="mx-6 mb-4">
-        <Text className="text-sprout-400 text-xs uppercase tracking-wider mb-3">
+      <Animated.View entering={FadeIn.delay(900).duration(400)} style={{ marginHorizontal: 24, marginBottom: 16 }}>
+        <Text style={{ color: '#639922', fontSize: 12, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 12 }}>
           {'\ud83c\udf73'} Try these recipes with your harvest
         </Text>
         {recipes.map((recipe) => (
-          <Pressable
+          <TouchableOpacity
             key={recipe.id}
-            className={`rounded-2xl mb-3 overflow-hidden ${
-              expandedRecipe === recipe.id ? 'bg-sprout-800' : 'bg-sprout-800/50'
-            }`}
+            activeOpacity={0.7}
+            style={{
+              borderRadius: 16,
+              marginBottom: 12,
+              overflow: 'hidden',
+              backgroundColor: expandedRecipe === recipe.id ? '#27500A' : 'rgba(39,80,10,0.5)',
+            }}
             onPress={() => setExpandedRecipe(expandedRecipe === recipe.id ? null : recipe.id)}
           >
-            <View className="p-4">
-              <View className="flex-row items-center justify-between">
-                <View className="flex-1">
-                  <Text className="text-white font-bold">{recipe.title}</Text>
-                  <Text className="text-sprout-400 text-xs mt-1">
+            <View style={{ padding: 16 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ color: '#ffffff', fontWeight: 'bold' }}>{recipe.title}</Text>
+                  <Text style={{ color: '#639922', fontSize: 12, marginTop: 4 }}>
                     {recipe.prepMinutes} min {'\u00b7'} {recipe.tags.join(' \u00b7 ')}
                   </Text>
                 </View>
-                <Text className="text-sprout-400 text-lg">
+                <Text style={{ color: '#639922', fontSize: 18 }}>
                   {expandedRecipe === recipe.id ? '\u25b2' : '\u25bc'}
                 </Text>
               </View>
-              <Text className="text-sprout-200 text-sm mt-2">{recipe.description}</Text>
-              <Text className="text-sprout-400 text-xs italic mt-1">{recipe.nutritionHighlight}</Text>
+              <Text style={{ color: '#97C459', fontSize: 14, marginTop: 8 }}>{recipe.description}</Text>
+              <Text style={{ color: '#639922', fontSize: 12, fontStyle: 'italic', marginTop: 4 }}>{recipe.nutritionHighlight}</Text>
             </View>
 
             {expandedRecipe === recipe.id && (
-              <View className="px-4 pb-4 border-t border-sprout-700 pt-3">
-                <Text className="text-sprout-400 text-xs uppercase tracking-wider mb-2">Ingredients</Text>
+              <View style={{ paddingHorizontal: 16, paddingBottom: 16, borderTopWidth: 1, borderTopColor: '#3B6D11', paddingTop: 12 }}>
+                <Text style={{ color: '#639922', fontSize: 12, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>Ingredients</Text>
                 {recipe.ingredients.map((ing, j) => (
-                  <Text key={j} className="text-sprout-200 text-sm">{'\u2022'} {ing}</Text>
+                  <Text key={j} style={{ color: '#97C459', fontSize: 14 }}>{'\u2022'} {ing}</Text>
                 ))}
-                <Text className="text-sprout-400 text-xs uppercase tracking-wider mt-3 mb-2">Steps</Text>
+                <Text style={{ color: '#639922', fontSize: 12, textTransform: 'uppercase', letterSpacing: 1, marginTop: 12, marginBottom: 8 }}>Steps</Text>
                 {recipe.steps.map((s, j) => (
-                  <Text key={j} className="text-sprout-200 text-sm mb-1">{j + 1}. {s}</Text>
+                  <Text key={j} style={{ color: '#97C459', fontSize: 14, marginBottom: 4 }}>{j + 1}. {s}</Text>
                 ))}
-                <View className="mt-3">
+                <View style={{ marginTop: 12 }}>
                   <SpeakButton
                     text={`Recipe: ${recipe.title}. ${recipe.steps.join('. ')}`}
                     personality={personality}
@@ -173,18 +177,18 @@ export function HarvestCelebration({
                 </View>
               </View>
             )}
-          </Pressable>
+          </TouchableOpacity>
         ))}
       </Animated.View>
 
       {/* Action buttons */}
-      <View className="mx-6 mt-4 gap-3">
-        <Pressable className="bg-sprout-200 py-4 rounded-xl items-center" onPress={onStartNewBatch}>
-          <Text className="text-sprout-900 font-bold text-lg">Start Another Batch {'\ud83c\udf31'}</Text>
-        </Pressable>
-        <Pressable className="py-3 rounded-xl items-center border border-sprout-600" onPress={onDone}>
-          <Text className="text-sprout-200 font-medium">Done</Text>
-        </Pressable>
+      <View style={{ marginHorizontal: 24, marginTop: 16, gap: 12 }}>
+        <TouchableOpacity activeOpacity={0.7} style={{ backgroundColor: '#97C459', paddingVertical: 16, borderRadius: 12, alignItems: 'center' }} onPress={onStartNewBatch}>
+          <Text style={{ color: '#1a3a0a', fontWeight: 'bold', fontSize: 18 }}>Start Another Batch {'\ud83c\udf31'}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity activeOpacity={0.7} style={{ paddingVertical: 12, borderRadius: 12, alignItems: 'center', borderWidth: 1, borderColor: '#3B6D11' }} onPress={onDone}>
+          <Text style={{ color: '#97C459', fontWeight: '500' }}>Done</Text>
+        </TouchableOpacity>
       </View>
     </ScrollView>
   )

@@ -16,28 +16,28 @@ export function StaggerCalendar({ plan }: StaggerCalendarProps) {
 
   if (plan.length === 0) {
     return (
-      <View className="p-4 items-center">
-        <Text className="text-gray-400">No stagger plan generated yet</Text>
+      <View style={{ padding: 16, alignItems: 'center' }}>
+        <Text style={{ color: '#9ca3af' }}>No stagger plan generated yet</Text>
       </View>
     )
   }
 
   return (
-    <ScrollView className="max-h-80">
+    <ScrollView style={{ maxHeight: 320 }}>
       {plan.map((batch, index) => (
         <View
           key={index}
-          className="flex-row items-center px-4 py-3 border-b border-gray-100"
+          style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#f3f4f6' }}
         >
-          <Text className="text-2xl mr-3">{batch.beanType.emoji}</Text>
-          <View className="flex-1">
-            <Text className="font-medium text-sprout-800">{batch.beanType.name}</Text>
-            <Text className="text-xs text-gray-500">
+          <Text style={{ fontSize: 24, marginRight: 12 }}>{batch.beanType.emoji}</Text>
+          <View style={{ flex: 1 }}>
+            <Text style={{ fontWeight: '500', color: '#27500A' }}>{batch.beanType.name}</Text>
+            <Text style={{ fontSize: 12, color: '#6b7280' }}>
               Soak: {formatDate(batch.soakStartDate)} → Harvest: {formatDate(batch.harvestDate)}
             </Text>
           </View>
-          <View className="bg-sprout-100 px-2 py-0.5 rounded-chip">
-            <Text className="text-sprout-800 text-xs font-medium">Day +{batch.dayOffset}</Text>
+          <View style={{ backgroundColor: '#C0DD97', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 20 }}>
+            <Text style={{ color: '#27500A', fontSize: 12, fontWeight: '500' }}>Day +{batch.dayOffset}</Text>
           </View>
         </View>
       ))}

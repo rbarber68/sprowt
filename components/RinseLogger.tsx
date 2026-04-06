@@ -3,7 +3,7 @@
  * Quick-tap temp buttons + rinse water temp + observation chips
  */
 
-import { View, Text, Pressable } from 'react-native'
+import { View, Text, TouchableOpacity } from 'react-native'
 import { useState } from 'react'
 
 const ROOM_TEMPS = [62, 68, 72, 78]
@@ -30,70 +30,89 @@ export function RinseLogger({ onSubmit }: RinseLoggerProps) {
   }
 
   return (
-    <View className="p-4">
-      <Text className="text-lg font-bold text-sprout-800 mb-4">Log Rinse</Text>
+    <View style={{ padding: 16 }}>
+      <Text style={{ fontSize: 18, fontWeight: '700', color: '#27500A', marginBottom: 16 }}>Log Rinse</Text>
 
       {/* Room temperature */}
-      <Text className="text-sm font-medium text-gray-600 mb-2">Room temp (optional)</Text>
-      <View className="flex-row gap-2 mb-4">
+      <Text style={{ fontSize: 14, fontWeight: '500', color: '#4b5563', marginBottom: 8 }}>Room temp (optional)</Text>
+      <View style={{ flexDirection: 'row', gap: 8, marginBottom: 16 }}>
         {ROOM_TEMPS.map(temp => (
-          <Pressable
+          <TouchableOpacity
             key={temp}
-            className={`px-4 py-2 rounded-chip border ${
-              roomTemp === temp ? 'bg-sprout-200 border-sprout-400' : 'bg-white border-gray-200'
-            }`}
+            activeOpacity={0.7}
+            style={{
+              paddingHorizontal: 16,
+              paddingVertical: 8,
+              borderRadius: 9999,
+              borderWidth: 1,
+              backgroundColor: roomTemp === temp ? '#97C459' : '#ffffff',
+              borderColor: roomTemp === temp ? '#639922' : '#e5e7eb',
+            }}
             onPress={() => setRoomTemp(roomTemp === temp ? undefined : temp)}
           >
-            <Text className={roomTemp === temp ? 'text-sprout-800 font-medium' : 'text-gray-600'}>
+            <Text style={{ color: roomTemp === temp ? '#27500A' : '#4b5563', fontWeight: roomTemp === temp ? '500' : '400' }}>
               {temp}°F
             </Text>
-          </Pressable>
+          </TouchableOpacity>
         ))}
       </View>
 
       {/* Rinse water temp */}
-      <Text className="text-sm font-medium text-gray-600 mb-2">Rinse water (optional)</Text>
-      <View className="flex-row gap-2 mb-4">
+      <Text style={{ fontSize: 14, fontWeight: '500', color: '#4b5563', marginBottom: 8 }}>Rinse water (optional)</Text>
+      <View style={{ flexDirection: 'row', gap: 8, marginBottom: 16 }}>
         {WATER_TEMPS.map(temp => (
-          <Pressable
+          <TouchableOpacity
             key={temp}
-            className={`px-4 py-2 rounded-chip border ${
-              waterTemp === temp ? 'bg-info-100 border-info-400' : 'bg-white border-gray-200'
-            }`}
+            activeOpacity={0.7}
+            style={{
+              paddingHorizontal: 16,
+              paddingVertical: 8,
+              borderRadius: 9999,
+              borderWidth: 1,
+              backgroundColor: waterTemp === temp ? '#FAC775' : '#ffffff',
+              borderColor: waterTemp === temp ? '#BA7517' : '#e5e7eb',
+            }}
             onPress={() => setWaterTemp(waterTemp === temp ? undefined : temp)}
           >
-            <Text className={waterTemp === temp ? 'text-info-800 font-medium' : 'text-gray-600'}>
+            <Text style={{ color: waterTemp === temp ? '#4b5563' : '#4b5563', fontWeight: waterTemp === temp ? '500' : '400' }}>
               {temp}
             </Text>
-          </Pressable>
+          </TouchableOpacity>
         ))}
       </View>
 
       {/* Observations */}
-      <Text className="text-sm font-medium text-gray-600 mb-2">Observations (optional)</Text>
-      <View className="flex-row flex-wrap gap-2 mb-6">
+      <Text style={{ fontSize: 14, fontWeight: '500', color: '#4b5563', marginBottom: 8 }}>Observations (optional)</Text>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 24 }}>
         {OBSERVATIONS.map(obs => (
-          <Pressable
+          <TouchableOpacity
             key={obs}
-            className={`px-3 py-1.5 rounded-chip border ${
-              observations.includes(obs) ? 'bg-soak-100 border-soak-400' : 'bg-white border-gray-200'
-            }`}
+            activeOpacity={0.7}
+            style={{
+              paddingHorizontal: 12,
+              paddingVertical: 6,
+              borderRadius: 9999,
+              borderWidth: 1,
+              backgroundColor: observations.includes(obs) ? '#FAC775' : '#ffffff',
+              borderColor: observations.includes(obs) ? '#BA7517' : '#e5e7eb',
+            }}
             onPress={() => toggleObservation(obs)}
           >
-            <Text className={observations.includes(obs) ? 'text-soak-800 text-sm' : 'text-gray-600 text-sm'}>
+            <Text style={{ color: observations.includes(obs) ? '#4b5563' : '#4b5563', fontSize: 14 }}>
               {obs}
             </Text>
-          </Pressable>
+          </TouchableOpacity>
         ))}
       </View>
 
       {/* Submit */}
-      <Pressable
-        className="bg-sprout-600 py-3 rounded-card items-center"
+      <TouchableOpacity
+        activeOpacity={0.7}
+        style={{ backgroundColor: '#3B6D11', paddingVertical: 12, borderRadius: 12, alignItems: 'center' }}
         onPress={() => onSubmit({ roomTempF: roomTemp, rinseWaterTemp: waterTemp, observations })}
       >
-        <Text className="text-white font-bold text-base">Log Rinse</Text>
-      </Pressable>
+        <Text style={{ color: '#ffffff', fontWeight: '700', fontSize: 16 }}>Log Rinse</Text>
+      </TouchableOpacity>
     </View>
   )
 }
