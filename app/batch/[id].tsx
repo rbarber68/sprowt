@@ -1,4 +1,4 @@
-import { View, Text, Pressable, ScrollView, Modal, Alert, TextInput } from 'react-native'
+import { View, Text, TouchableOpacity, ScrollView, Modal, Alert, TextInput } from 'react-native'
 import { useLocalSearchParams, router, Stack } from 'expo-router'
 import { useEffect, useState, useCallback } from 'react'
 import { uuidv4 } from '@/lib/uuid'
@@ -129,8 +129,8 @@ export default function BatchDetailScreen() {
 
   if (!batch || !character || !beanType) {
     return (
-      <View className="flex-1 items-center justify-center">
-        <Text className="text-gray-400">Loading...</Text>
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+        <Text style={{ color: '#9ca3af' }}>Loading...</Text>
       </View>
     )
   }
@@ -303,15 +303,15 @@ export default function BatchDetailScreen() {
       <Stack.Screen options={{
         title: `${character.name}`,
         headerRight: () => (
-          <Pressable style={{ marginRight: 12 }} onPress={handleRerollCharacter}>
+          <TouchableOpacity activeOpacity={0.7} style={{ marginRight: 12 }} onPress={handleRerollCharacter}>
             <Text style={{ fontSize: 18 }}>{'\ud83c\udfb2'}</Text>
-          </Pressable>
+          </TouchableOpacity>
         ),
       }} />
 
-      <ScrollView className="flex-1 bg-white">
+      <ScrollView style={{ flex: 1, backgroundColor: '#ffffff' }}>
         {/* Character header */}
-        <View className="items-center pt-4 pb-3 bg-sprout-50">
+        <View style={{ alignItems: 'center', paddingTop: 16, paddingBottom: 12, backgroundColor: '#EAF3DE' }}>
           <CharacterAvatar
             faceColor={character.faceColor}
             eyeColor={character.eyeColor}
@@ -321,33 +321,32 @@ export default function BatchDetailScreen() {
             size={72}
             animation={batch.status === 'ready' ? 'celebrate' : 'idle'}
           />
-          <Text className="text-lg font-bold text-sprout-800 mt-2">{character.name}</Text>
-          <Text className="text-sm text-gray-500">
+          <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#27500A', marginTop: 8 }}>{character.name}</Text>
+          <Text style={{ fontSize: 14, color: '#6b7280' }}>
             {beanType.emoji} {beanType.name} {'\u00b7'} {batch.jarLabel}
           </Text>
-          <Text className="text-xs text-gray-400 italic mt-1">"{character.catchphrase}"</Text>
+          <Text style={{ fontSize: 12, color: '#9ca3af', fontStyle: 'italic', marginTop: 4 }}>"{character.catchphrase}"</Text>
         </View>
 
         {/* Status + progress */}
-        <View className="px-4 py-3 flex-row justify-between items-center border-b border-gray-100">
+        <View style={{ paddingHorizontal: 16, paddingVertical: 12, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderBottomWidth: 1, borderBottomColor: '#f3f4f6' }}>
           <View>
-            <Text className="text-sm text-gray-500">Day {dayNumber} of {totalDays}</Text>
-            <Text className="text-xs text-gray-400 capitalize">{batch.status}</Text>
+            <Text style={{ fontSize: 14, color: '#6b7280' }}>Day {dayNumber} of {totalDays}</Text>
+            <Text style={{ fontSize: 12, color: '#9ca3af', textTransform: 'capitalize' }}>{batch.status}</Text>
           </View>
-          <View className="flex-1 mx-4 h-2 bg-gray-200 rounded-full">
+          <View style={{ flex: 1, marginHorizontal: 16, height: 8, backgroundColor: '#e5e7eb', borderRadius: 9999 }}>
             <View
-              className="h-2 bg-sprout-400 rounded-full"
-              style={{ width: `${Math.min(dayNumber / totalDays, 1) * 100}%` }}
+              style={{ height: 8, backgroundColor: '#639922', borderRadius: 9999, width: `${Math.min(dayNumber / totalDays, 1) * 100}%` }}
             />
           </View>
-          <Text className="text-sm font-medium text-sprout-600">
+          <Text style={{ fontSize: 14, fontWeight: '500', color: '#3B6D11' }}>
             {Math.max(0, totalDays - dayNumber)}d left
           </Text>
         </View>
 
         {/* Photo timeline */}
-        <View className="px-4 py-4">
-          <Text className="text-lg font-bold text-sprout-800 mb-3">Photo Journal</Text>
+        <View style={{ paddingHorizontal: 16, paddingVertical: 16 }}>
+          <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#27500A', marginBottom: 12 }}>Photo Journal</Text>
           <PhotoTimeline
             photos={photos}
             onAddPhoto={handleAddPhoto}
@@ -355,9 +354,9 @@ export default function BatchDetailScreen() {
         </View>
 
         {/* Batch details */}
-        <View className="px-4 py-3">
-          <Text className="text-lg font-bold text-sprout-800 mb-3">Batch Details</Text>
-          <View className="bg-gray-50 rounded-card p-4">
+        <View style={{ paddingHorizontal: 16, paddingVertical: 12 }}>
+          <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#27500A', marginBottom: 12 }}>Batch Details</Text>
+          <View style={{ backgroundColor: '#f9fafb', borderRadius: 12, padding: 16 }}>
             <DetailRow label="Bean type" value={`${beanType.emoji} ${beanType.name}`} />
             <DetailRow label="Jar label" value={batch.jarLabel} />
             <DetailRow label="Soak started" value={new Date(batch.soakStartAt).toLocaleString()} />
@@ -378,19 +377,19 @@ export default function BatchDetailScreen() {
         />
 
         {/* Recent rinse log */}
-        <View className="px-4 py-3">
-          <Text className="text-lg font-bold text-sprout-800 mb-3">Rinse Log</Text>
+        <View style={{ paddingHorizontal: 16, paddingVertical: 12 }}>
+          <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#27500A', marginBottom: 12 }}>Rinse Log</Text>
           {recentLogs.filter(l => l.logType === 'rinse').length === 0 ? (
-            <Text className="text-gray-400 text-sm">No rinses logged yet</Text>
+            <Text style={{ color: '#9ca3af', fontSize: 14 }}>No rinses logged yet</Text>
           ) : (
             recentLogs.filter(l => l.logType === 'rinse').slice(0, 5).map(log => (
-              <View key={log.id} className="flex-row justify-between py-2 border-b border-gray-50">
-                <Text className="text-sm text-gray-600">
+              <View key={log.id} style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: '#f9fafb' }}>
+                <Text style={{ fontSize: 14, color: '#4b5563' }}>
                   {new Date(log.loggedAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
                 </Text>
-                <View className="flex-row gap-2">
-                  {log.roomTempF && <Text className="text-xs text-gray-500">{log.roomTempF}{'\u00b0'}F</Text>}
-                  {log.rinseWaterTemp && <Text className="text-xs text-info-600">{log.rinseWaterTemp}</Text>}
+                <View style={{ flexDirection: 'row', gap: 8 }}>
+                  {log.roomTempF && <Text style={{ fontSize: 12, color: '#6b7280' }}>{log.roomTempF}{'\u00b0'}F</Text>}
+                  {log.rinseWaterTemp && <Text style={{ fontSize: 12, color: '#185FA5' }}>{log.rinseWaterTemp}</Text>}
                 </View>
               </View>
             ))
@@ -398,34 +397,37 @@ export default function BatchDetailScreen() {
         </View>
 
         {/* Action buttons */}
-        <View className="px-4 py-4 gap-3">
+        <View style={{ paddingHorizontal: 16, paddingVertical: 16, gap: 12 }}>
           {batch.status !== 'harvested' && batch.status !== 'discarded' && (
             <>
-              <Pressable
-                className="bg-info-50 border border-info-200 py-3 rounded-card items-center"
+              <TouchableOpacity
+                activeOpacity={0.7}
+                style={{ backgroundColor: '#E6F1FB', borderWidth: 1, borderColor: '#85B7EB', paddingVertical: 12, borderRadius: 12, alignItems: 'center' }}
                 onPress={() => setShowRinseLogger(true)}
               >
-                <Text className="text-info-600 font-bold">Log Rinse</Text>
-              </Pressable>
+                <Text style={{ color: '#185FA5', fontWeight: 'bold' }}>Log Rinse</Text>
+              </TouchableOpacity>
 
-              <Pressable
-                className="bg-sprout-600 py-4 rounded-card items-center"
+              <TouchableOpacity
+                activeOpacity={0.7}
+                style={{ backgroundColor: '#3B6D11', paddingVertical: 16, borderRadius: 12, alignItems: 'center' }}
                 onPress={handleHarvest}
               >
-                <Text className="text-white font-bold text-lg">Harvest Now</Text>
-              </Pressable>
+                <Text style={{ color: '#ffffff', fontWeight: 'bold', fontSize: 18 }}>Harvest Now</Text>
+              </TouchableOpacity>
 
-              <Pressable
-                className="border border-alert-200 py-3 rounded-card items-center"
+              <TouchableOpacity
+                activeOpacity={0.7}
+                style={{ borderWidth: 1, borderColor: '#F0997B', paddingVertical: 12, borderRadius: 12, alignItems: 'center' }}
                 onPress={handleDiscard}
               >
-                <Text className="text-alert-600">Discard Batch</Text>
-              </Pressable>
+                <Text style={{ color: '#993C1D' }}>Discard Batch</Text>
+              </TouchableOpacity>
             </>
           )}
         </View>
 
-        <View className="h-10" />
+        <View style={{ height: 40 }} />
       </ScrollView>
 
       {/* Rinse logger bottom sheet (modal) */}
@@ -435,12 +437,12 @@ export default function BatchDetailScreen() {
         presentationStyle="pageSheet"
         onRequestClose={() => setShowRinseLogger(false)}
       >
-        <View className="flex-1 bg-white pt-4">
-          <View className="flex-row justify-between items-center px-4 mb-2">
-            <Text className="text-lg font-bold text-sprout-800">Log Rinse</Text>
-            <Pressable onPress={() => setShowRinseLogger(false)}>
-              <Text className="text-2xl text-gray-400">{'\u2715'}</Text>
-            </Pressable>
+        <View style={{ flex: 1, backgroundColor: '#ffffff', paddingTop: 16 }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, marginBottom: 8 }}>
+            <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#27500A' }}>Log Rinse</Text>
+            <TouchableOpacity activeOpacity={0.7} onPress={() => setShowRinseLogger(false)}>
+              <Text style={{ fontSize: 24, color: '#9ca3af' }}>{'\u2715'}</Text>
+            </TouchableOpacity>
           </View>
           <RinseLogger onSubmit={handleRinseLog} />
         </View>
@@ -453,7 +455,7 @@ export default function BatchDetailScreen() {
         onRequestClose={() => { setShowHarvestModal(false); setHarvestStep('farewell') }}
       >
         {harvestStep === 'farewell' ? (
-          <View className="flex-1 bg-sprout-50 items-center justify-center p-8">
+          <View style={{ flex: 1, backgroundColor: '#EAF3DE', alignItems: 'center', justifyContent: 'center', padding: 32 }}>
             <CharacterAvatar
               faceColor={character.faceColor}
               eyeColor={character.eyeColor}
@@ -463,41 +465,42 @@ export default function BatchDetailScreen() {
               size={120}
               animation="celebrate"
             />
-            <Text className="text-2xl font-bold text-sprout-800 mt-6 text-center">
+            <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#27500A', marginTop: 24, textAlign: 'center' }}>
               {farewell?.title ?? 'Harvest time!'}
             </Text>
-            <Text className="text-base text-gray-600 mt-4 text-center leading-6">
+            <Text style={{ fontSize: 16, color: '#4b5563', marginTop: 16, textAlign: 'center', lineHeight: 24 }}>
               {farewell?.body ?? 'Your sprout is ready to harvest.'}
             </Text>
-            <Pressable
-              className="bg-sprout-600 px-8 py-4 rounded-card mt-8"
+            <TouchableOpacity
+              activeOpacity={0.7}
+              style={{ backgroundColor: '#3B6D11', paddingHorizontal: 32, paddingVertical: 16, borderRadius: 12, marginTop: 32 }}
               onPress={() => setHarvestStep('rate')}
             >
-              <Text className="text-white font-bold text-lg">
+              <Text style={{ color: '#ffffff', fontWeight: 'bold', fontSize: 18 }}>
                 {farewell?.cta ?? 'Harvest'}
               </Text>
-            </Pressable>
+            </TouchableOpacity>
           </View>
         ) : (
-          <ScrollView className="flex-1 bg-white" contentContainerClassName="p-6">
-            <Text className="text-2xl font-bold text-sprout-800 mb-6">Rate this batch</Text>
+          <ScrollView style={{ flex: 1, backgroundColor: '#ffffff' }} contentContainerStyle={{ padding: 24 }}>
+            <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#27500A', marginBottom: 24 }}>Rate this batch</Text>
 
             {/* Star rating */}
-            <Text className="text-sm font-medium text-gray-500 mb-2">How was it? (1-5)</Text>
-            <View className="flex-row gap-2 mb-4">
+            <Text style={{ fontSize: 14, fontWeight: '500', color: '#6b7280', marginBottom: 8 }}>How was it? (1-5)</Text>
+            <View style={{ flexDirection: 'row', gap: 8, marginBottom: 16 }}>
               {[1, 2, 3, 4, 5].map(star => (
-                <Pressable key={star} onPress={() => setHarvestRating(star)}>
-                  <Text className="text-3xl">
+                <TouchableOpacity activeOpacity={0.7} key={star} onPress={() => setHarvestRating(star)}>
+                  <Text style={{ fontSize: 30 }}>
                     {star <= harvestRating ? '\u2605' : '\u2606'}
                   </Text>
-                </Pressable>
+                </TouchableOpacity>
               ))}
             </View>
 
             {/* Germination % */}
-            <Text className="text-sm font-medium text-gray-500 mb-2">Germination % (optional)</Text>
+            <Text style={{ fontSize: 14, fontWeight: '500', color: '#6b7280', marginBottom: 8 }}>Germination % (optional)</Text>
             <TextInput
-              className="bg-gray-100 rounded-card px-4 py-3 text-base mb-4"
+              style={{ backgroundColor: '#f3f4f6', borderRadius: 12, paddingHorizontal: 16, paddingVertical: 12, fontSize: 16, marginBottom: 16 }}
               value={harvestGermination}
               onChangeText={setHarvestGermination}
               placeholder="e.g., 95"
@@ -506,9 +509,9 @@ export default function BatchDetailScreen() {
             />
 
             {/* Notes */}
-            <Text className="text-sm font-medium text-gray-500 mb-2">Notes (optional)</Text>
+            <Text style={{ fontSize: 14, fontWeight: '500', color: '#6b7280', marginBottom: 8 }}>Notes (optional)</Text>
             <TextInput
-              className="bg-gray-100 rounded-card px-4 py-3 text-base mb-6"
+              style={{ backgroundColor: '#f3f4f6', borderRadius: 12, paddingHorizontal: 16, paddingVertical: 12, fontSize: 16, marginBottom: 24 }}
               value={harvestNotes}
               onChangeText={setHarvestNotes}
               placeholder="How did this batch turn out?"
@@ -518,9 +521,9 @@ export default function BatchDetailScreen() {
             />
 
             {/* Harvest weight */}
-            <Text className="text-sm font-medium text-gray-500 mb-2">Harvest weight (grams)</Text>
+            <Text style={{ fontSize: 14, fontWeight: '500', color: '#6b7280', marginBottom: 8 }}>Harvest weight (grams)</Text>
             <TextInput
-              className="bg-gray-100 rounded-card px-4 py-3 text-base mb-4"
+              style={{ backgroundColor: '#f3f4f6', borderRadius: 12, paddingHorizontal: 16, paddingVertical: 12, fontSize: 16, marginBottom: 16 }}
               value={harvestWeight}
               onChangeText={setHarvestWeight}
               placeholder="e.g., 130"
@@ -529,46 +532,61 @@ export default function BatchDetailScreen() {
             />
 
             {/* Container fill % */}
-            <Text className="text-sm font-medium text-gray-500 mb-2">How full was the container?</Text>
-            <View className="flex-row gap-2 mb-4">
+            <Text style={{ fontSize: 14, fontWeight: '500', color: '#6b7280', marginBottom: 8 }}>How full was the container?</Text>
+            <View style={{ flexDirection: 'row', gap: 8, marginBottom: 16 }}>
               {[25, 50, 75, 100].map(pct => (
-                <Pressable
+                <TouchableOpacity
+                  activeOpacity={0.7}
                   key={pct}
-                  className={`flex-1 py-2 rounded-chip border items-center ${
-                    harvestFillPct === pct ? 'bg-sprout-200 border-sprout-400' : 'border-gray-200'
-                  }`}
+                  style={{
+                    flex: 1,
+                    paddingVertical: 8,
+                    borderRadius: 20,
+                    borderWidth: 1,
+                    alignItems: 'center',
+                    backgroundColor: harvestFillPct === pct ? '#97C459' : 'transparent',
+                    borderColor: harvestFillPct === pct ? '#639922' : '#e5e7eb',
+                  }}
                   onPress={() => setHarvestFillPct(pct)}
                 >
-                  <Text className={harvestFillPct === pct ? 'text-sprout-800 text-sm font-medium' : 'text-gray-600 text-sm'}>
+                  <Text style={{ fontSize: 14, fontWeight: harvestFillPct === pct ? '500' : '400', color: harvestFillPct === pct ? '#27500A' : '#4b5563' }}>
                     {pct}%
                   </Text>
-                </Pressable>
+                </TouchableOpacity>
               ))}
-              <Pressable
-                className={`flex-1 py-2 rounded-chip border items-center ${
-                  harvestFillPct === 110 ? 'bg-soak-100 border-soak-400' : 'border-gray-200'
-                }`}
+              <TouchableOpacity
+                activeOpacity={0.7}
+                style={{
+                  flex: 1,
+                  paddingVertical: 8,
+                  borderRadius: 20,
+                  borderWidth: 1,
+                  alignItems: 'center',
+                  backgroundColor: harvestFillPct === 110 ? '#FAC775' : 'transparent',
+                  borderColor: harvestFillPct === 110 ? '#FAC775' : '#e5e7eb',
+                }}
                 onPress={() => setHarvestFillPct(110)}
               >
-                <Text className="text-sm">{'\ud83d\udca5'}</Text>
-              </Pressable>
+                <Text style={{ fontSize: 14 }}>{'\ud83d\udca5'}</Text>
+              </TouchableOpacity>
             </View>
 
             {/* Yield ratio preview */}
             {harvestWeight && batch.seedAmountGrams && batch.seedAmountGrams > 0 && (
-              <View className="bg-sprout-50 rounded-card p-3 mb-4">
-                <Text className="text-sm text-sprout-600 font-medium">
+              <View style={{ backgroundColor: '#EAF3DE', borderRadius: 12, padding: 12, marginBottom: 16 }}>
+                <Text style={{ fontSize: 14, color: '#3B6D11', fontWeight: '500' }}>
                   Yield: {(parseFloat(harvestWeight) / batch.seedAmountGrams).toFixed(1)}x from {batch.seedAmountGrams}g seed
                 </Text>
               </View>
             )}
 
-            <Pressable
-              className="bg-sprout-600 py-4 rounded-card items-center"
+            <TouchableOpacity
+              activeOpacity={0.7}
+              style={{ backgroundColor: '#3B6D11', paddingVertical: 16, borderRadius: 12, alignItems: 'center' }}
               onPress={confirmHarvest}
             >
-              <Text className="text-white font-bold text-lg">Complete Harvest</Text>
-            </Pressable>
+              <Text style={{ color: '#ffffff', fontWeight: 'bold', fontSize: 18 }}>Complete Harvest</Text>
+            </TouchableOpacity>
           </ScrollView>
         )}
 
@@ -599,27 +617,29 @@ export default function BatchDetailScreen() {
         animationType="slide"
         onRequestClose={() => setShowCamera(false)}
       >
-        <View className="flex-1 bg-black">
+        <View style={{ flex: 1, backgroundColor: '#000000' }}>
           <CameraView
             ref={cameraRef}
-            className="flex-1"
+            style={{ flex: 1 }}
             facing="back"
           >
-            <View className="flex-1 justify-end items-center pb-10">
-              <View className="flex-row items-center gap-6">
-                <Pressable
-                  className="bg-white/30 px-6 py-3 rounded-card"
+            <View style={{ flex: 1, justifyContent: 'flex-end', alignItems: 'center', paddingBottom: 40 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 24 }}>
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  style={{ backgroundColor: 'rgba(255,255,255,0.3)', paddingHorizontal: 24, paddingVertical: 12, borderRadius: 12 }}
                   onPress={() => setShowCamera(false)}
                 >
-                  <Text className="text-white font-medium">Cancel</Text>
-                </Pressable>
-                <Pressable
-                  className="w-20 h-20 rounded-full bg-white border-4 border-sprout-400 items-center justify-center"
+                  <Text style={{ color: '#ffffff', fontWeight: '500' }}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  style={{ width: 80, height: 80, borderRadius: 40, backgroundColor: '#ffffff', borderWidth: 4, borderColor: '#639922', alignItems: 'center', justifyContent: 'center' }}
                   onPress={takePicture}
                 >
-                  <View className="w-16 h-16 rounded-full bg-sprout-400" />
-                </Pressable>
-                <View className="w-20" />
+                  <View style={{ width: 64, height: 64, borderRadius: 32, backgroundColor: '#639922' }} />
+                </TouchableOpacity>
+                <View style={{ width: 80 }} />
               </View>
             </View>
           </CameraView>
@@ -631,9 +651,9 @@ export default function BatchDetailScreen() {
 
 function DetailRow({ label, value }: { label: string; value: string }) {
   return (
-    <View className="flex-row justify-between py-1.5 border-b border-gray-100">
-      <Text className="text-sm text-gray-500">{label}</Text>
-      <Text className="text-sm text-sprout-800">{value}</Text>
+    <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 6, borderBottomWidth: 1, borderBottomColor: '#f3f4f6' }}>
+      <Text style={{ fontSize: 14, color: '#6b7280' }}>{label}</Text>
+      <Text style={{ fontSize: 14, color: '#27500A' }}>{value}</Text>
     </View>
   )
 }
