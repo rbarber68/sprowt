@@ -536,6 +536,7 @@ function Step4CharacterReveal({
           mouth={character.mouth}
           accessoryEmoji={character.accessoryEmoji}
           size={88}
+          animation="reveal"
         />
         <Text className="text-xl font-bold text-sprout-800 mt-4">{character.name}</Text>
 

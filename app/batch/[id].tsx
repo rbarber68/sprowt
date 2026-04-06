@@ -300,6 +300,7 @@ export default function BatchDetailScreen() {
             mouth={character.mouth}
             accessoryEmoji={character.accessoryEmoji}
             size={72}
+            animation={batch.status === 'ready' ? 'celebrate' : 'idle'}
           />
           <Text className="text-lg font-bold text-sprout-800 mt-2">{character.name}</Text>
           <Text className="text-sm text-gray-500">
@@ -441,6 +442,7 @@ export default function BatchDetailScreen() {
               mouth={character.mouth}
               accessoryEmoji={character.accessoryEmoji}
               size={120}
+              animation="celebrate"
             />
             <Text className="text-2xl font-bold text-sprout-800 mt-6 text-center">
               {farewell?.title ?? 'Harvest time!'}
