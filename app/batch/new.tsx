@@ -142,7 +142,25 @@ export default function NewBatchScreen() {
         seedAmountGrams: parseFloat(seedAmount) || selectedBean.seedAmountGrams,
       })
 
-      // Schedule notifications
+      // Schedule soak-complete notification
+      try {
+        const Notifications = require('expo-notifications')
+        const soakEndDate = new Date(now + soakMs)
+        await Notifications.scheduleNotificationAsync({
+          content: {
+            title: `${character.accessoryEmoji} ${character.name}'s soak is done!`,
+            body: `Time to drain and move to the jar! ${selectedBean.soakHours}h soak complete.`,
+            data: { batchId, type: 'soak-complete' },
+          },
+          trigger: {
+            type: Notifications.SchedulableTriggerInputTypes.DATE,
+            date: soakEndDate,
+            channelId: 'sprout-reminders',
+          },
+        })
+      } catch {}
+
+      // Schedule rinse notifications
       const hasPermission = await requestNotificationPermission()
       if (hasPermission) {
         const rinseTimes = [
