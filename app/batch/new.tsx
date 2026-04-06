@@ -4,7 +4,7 @@ import { router, useLocalSearchParams } from 'expo-router'
 import { uuidv4 } from '@/lib/uuid'
 import { SPROUT_TYPES, TRAY_SPROUTS, BEGINNER_PROGRESSION, type BeanType } from '@/data/sproutTypes'
 import { generateCharacter, type CharacterTraits } from '@/data/characters'
-import { CharacterAvatar } from '@/components/CharacterAvatar'
+
 import { db } from '@/db/client'
 import { batches, characters, seedSources } from '@/db/schema'
 import { eq } from 'drizzle-orm'
@@ -13,7 +13,7 @@ import { requestNotificationPermission, scheduleRinseNotifications } from '@/lib
 import { ContainerPicker } from '@/components/ContainerPicker'
 import { getYieldHint } from '@/lib/performance'
 
-type Step = 0 | 1 | 2 | 3 | 4
+type Step = 0 | 1 | 2 | 3
 
 export default function NewBatchScreen() {
   const params = useLocalSearchParams<{ beanTypeId?: string }>()
@@ -23,7 +23,6 @@ export default function NewBatchScreen() {
   const [newSupplier, setNewSupplier] = useState('')
   const [jarLabel, setJarLabel] = useState('Jar A')
   const [startNow, setStartNow] = useState(true)
-  const [character, setCharacter] = useState<(Omit<CharacterTraits, 'id'> & { personalityLabel: string }) | null>(null)
   const [saving, setSaving] = useState(false)
   const [containerId, setContainerId] = useState<string | null>(null)
   const [seedAmount, setSeedAmount] = useState('')
@@ -40,16 +39,6 @@ export default function NewBatchScreen() {
       .where(eq(seedSources.beanTypeId, selectedBeanTypeId))
       .then(setExistingSources)
   }, [selectedBeanTypeId])
-
-  const rollCharacter = useCallback(() => {
-    if (!selectedBeanTypeId) return
-    setCharacter(generateCharacter(selectedBeanTypeId))
-  }, [selectedBeanTypeId])
-
-  // Auto-roll character on step 3
-  useEffect(() => {
-    if (step === 3 && !character) rollCharacter()
-  }, [step, character, rollCharacter])
 
   // Auto-fill seed amount from bean type default
   useEffect(() => {
@@ -68,7 +57,9 @@ export default function NewBatchScreen() {
   }, [selectedBeanTypeId, containerId])
 
   const createBatch = async () => {
-    if (!selectedBean || !character) return
+    if (!selectedBean) return
+    // Generate character silently — will be revealed when user drains from soak
+    const character = generateCharacter(selectedBean.id)
     setSaving(true)
 
     try {
@@ -192,7 +183,7 @@ export default function NewBatchScreen() {
     <View style={{ flex: 1, backgroundColor: '#fff' }}>
       {/* Progress dots */}
       <View style={{ flexDirection: 'row', justifyContent: 'center', paddingVertical: 16, gap: 8 }}>
-        {([0, 1, 2, 3, 4] as Step[]).map(s => (
+        {([0, 1, 2, 3] as Step[]).map(s => (
           <View
             key={s}
             style={{
@@ -239,22 +230,13 @@ export default function NewBatchScreen() {
           onBack={() => setStep(1)}
         />
       )}
-      {step === 3 && character && (
-        <Step4CharacterReveal
-          character={character}
-          onReroll={rollCharacter}
-          onNext={() => setStep(4)}
-          onBack={() => setStep(2)}
-        />
-      )}
-      {step === 4 && selectedBean && character && (
-        <Step5Confirm
+      {step === 3 && selectedBean && (
+        <Step4Confirm
           bean={selectedBean}
-          character={character}
           jarLabel={jarLabel}
           saving={saving}
           onConfirm={createBatch}
-          onBack={() => setStep(3)}
+          onBack={() => setStep(2)}
         />
       )}
     </View>
@@ -586,147 +568,16 @@ function Step3JarTiming({
 
 // ─── Step 4: Character Reveal ─────────────────────────────────────────────────
 
-function Step4CharacterReveal({
-  character,
-  onReroll,
-  onNext,
-  onBack,
-}: {
-  character: Omit<CharacterTraits, 'id'> & { personalityLabel: string }
-  onReroll: () => void
-  onNext: () => void
-  onBack: () => void
-}) {
-  const cardBorderColor =
-    character.rarity === 'legendary' ? '#EF9F27' :
-    character.rarity === 'rare' ? '#85B7EB' :
-    '#97C459'
-  const cardBgColor =
-    character.rarity === 'legendary' ? '#FAEEDA' :
-    character.rarity === 'rare' ? '#E6F1FB' :
-    '#EAF3DE'
-  const badgeBgColor =
-    character.rarity === 'legendary' ? '#EF9F27' :
-    character.rarity === 'rare' ? '#85B7EB' :
-    character.rarity === 'uncommon' ? '#97C459' :
-    '#e5e7eb'
+// ─── Step 4: Confirm & Start Soak ─────────────────────────────────────────────
 
-  return (
-    <ScrollView style={{ flex: 1, backgroundColor: cardBgColor }} contentContainerStyle={{ paddingBottom: 32 }}>
-      {/* Big hero avatar area */}
-      <View style={{ alignItems: 'center', paddingTop: 32, paddingBottom: 24 }}>
-        <View style={{
-          width: 140, height: 140, borderRadius: 70,
-          backgroundColor: character.faceColor + '30',
-          alignItems: 'center', justifyContent: 'center',
-          borderWidth: 3, borderColor: cardBorderColor,
-          shadowColor: cardBorderColor, shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.3, shadowRadius: 16, elevation: 8,
-        }}>
-          <CharacterAvatar
-            faceColor={character.faceColor}
-            eyeColor={character.eyeColor}
-            eyeShape={character.eyeShape}
-            mouth={character.mouth}
-            accessoryEmoji={character.accessoryEmoji}
-            size={100}
-            animation="reveal"
-          />
-        </View>
-
-        <Text style={{ fontSize: 26, fontWeight: 'bold', color: '#27500A', marginTop: 16 }}>{character.name}</Text>
-
-        {/* Rarity badge */}
-        <View style={{
-          paddingHorizontal: 16, paddingVertical: 5, borderRadius: 20, marginTop: 8,
-          backgroundColor: badgeBgColor,
-          shadowColor: badgeBgColor, shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.4, shadowRadius: 8, elevation: 4,
-        }}>
-          <Text style={{ fontSize: 12, fontWeight: 'bold', textTransform: 'uppercase',
-            color: character.rarity === 'common' ? '#374151' : '#fff' }}>{character.rarity}</Text>
-        </View>
-
-        <Text style={{ fontSize: 15, color: '#3B6D11', marginTop: 8, fontWeight: '600' }}>{character.personalityLabel}</Text>
-      </View>
-
-      {/* Catchphrase card */}
-      <View style={{ marginHorizontal: 20, backgroundColor: '#fff', borderRadius: 16, padding: 20, marginBottom: 16,
-        shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8, elevation: 2 }}>
-        <Text style={{ fontSize: 15, color: '#6b7280', fontStyle: 'italic', textAlign: 'center', lineHeight: 22 }}>
-          "{character.catchphrase}"
-        </Text>
-      </View>
-
-      {/* Traits as tag pills */}
-      <View style={{ marginHorizontal: 20, marginBottom: 16 }}>
-        <Text style={{ fontSize: 11, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 10 }}>Character Traits</Text>
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-          {[
-            { icon: '\ud83c\udf99\ufe0f', label: character.voiceStyle },
-            { icon: '\ud83d\ude28', label: `Fears: ${character.secretFear}` },
-            { icon: '\u2728', label: character.hiddenTalent },
-            { icon: '\ud83d\udca7', label: character.waterAttitude },
-          ].map((trait, i) => (
-            <View key={i} style={{ backgroundColor: '#fff', borderRadius: 12, paddingHorizontal: 12, paddingVertical: 8,
-              borderWidth: 1, borderColor: '#e5e7eb', flexDirection: 'row', alignItems: 'center' }}>
-              <Text style={{ fontSize: 14, marginRight: 6 }}>{trait.icon}</Text>
-              <Text style={{ fontSize: 12, color: '#4b5563', flexShrink: 1 }}>{trait.label}</Text>
-            </View>
-          ))}
-        </View>
-      </View>
-
-      {/* Action buttons */}
-      <View style={{ flexDirection: 'row', gap: 12, marginHorizontal: 20, marginTop: 8 }}>
-        <TouchableOpacity
-          activeOpacity={0.7}
-          style={{ flex: 1, paddingVertical: 14, borderRadius: 14, alignItems: 'center', borderWidth: 1, borderColor: '#d1d5db', backgroundColor: '#fff' }}
-          onPress={onBack}
-        >
-          <Text style={{ color: '#6b7280', fontWeight: '500' }}>Back</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          activeOpacity={0.7}
-          style={{ flex: 1, paddingVertical: 12, borderRadius: 12, alignItems: 'center', borderWidth: 1, borderColor: '#BA7517' }}
-          onPress={onReroll}
-        >
-          <Text style={{ color: '#BA7517', fontWeight: '500' }}>Re-roll</Text>
-        </TouchableOpacity>
-      </View>
-
-      <TouchableOpacity
-        activeOpacity={0.7}
-        style={{ width: '100%', paddingVertical: 16, borderRadius: 12, alignItems: 'center', backgroundColor: '#3B6D11', marginBottom: 32 }}
-        onPress={onNext}
-      >
-        <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 18 }}>Keep this one</Text>
-      </TouchableOpacity>
-    </ScrollView>
-  )
-}
-
-function TraitRow({ label, value }: { label: string; value: string }) {
-  return (
-    <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 4 }}>
-      <Text style={{ fontSize: 12, color: '#9ca3af' }}>{label}</Text>
-      <Text style={{ fontSize: 12, color: '#6b7280', flex: 1, textAlign: 'right' }}>{value}</Text>
-    </View>
-  )
-}
-
-// ─── Step 5: Confirm & Schedule ───────────────────────────────────────────────
-
-function Step5Confirm({
+function Step4Confirm({
   bean,
-  character,
   jarLabel,
   saving,
   onConfirm,
   onBack,
 }: {
   bean: BeanType
-  character: Omit<CharacterTraits, 'id'> & { personalityLabel: string }
   jarLabel: string
   saving: boolean
   onConfirm: () => void
@@ -737,7 +588,7 @@ function Step5Confirm({
 
   return (
     <ScrollView style={{ flex: 1, paddingHorizontal: 16 }}>
-      <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#27500A', marginBottom: 16 }}>Confirm your batch</Text>
+      <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#27500A', marginBottom: 16 }}>Ready to soak!</Text>
 
       <View style={{ backgroundColor: '#f9fafb', borderRadius: 12, padding: 16, marginBottom: 16 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
@@ -747,16 +598,12 @@ function Step5Confirm({
             <Text style={{ fontSize: 14, color: '#6b7280' }}>{jarLabel}</Text>
           </View>
         </View>
-        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
-          <CharacterAvatar
-            faceColor={character.faceColor}
-            eyeColor={character.eyeColor}
-            eyeShape={character.eyeShape}
-            mouth={character.mouth}
-            accessoryEmoji={character.accessoryEmoji}
-            size={32}
-          />
-          <Text style={{ marginLeft: 8, fontSize: 14, color: '#6b7280' }}>{character.name} ({character.personalityLabel})</Text>
+        {/* Mystery character teaser */}
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12, backgroundColor: '#FAEEDA', borderRadius: 10, padding: 10 }}>
+          <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: '#EF9F27', opacity: 0.5, alignItems: 'center', justifyContent: 'center', marginRight: 8 }}>
+            <Text style={{ fontSize: 16 }}>{'\u2753'}</Text>
+          </View>
+          <Text style={{ fontSize: 13, color: '#854F0B', fontStyle: 'italic', flex: 1 }}>A mystery character will emerge from the soak!</Text>
         </View>
         <View style={{ borderTopWidth: 1, borderTopColor: '#e5e7eb', paddingTop: 8 }}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
