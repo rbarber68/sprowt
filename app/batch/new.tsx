@@ -199,7 +199,7 @@ export default function NewBatchScreen() {
       {step === 0 && (
         <Step1PickSprout
           selectedId={selectedBeanTypeId}
-          onSelect={(id) => { setSelectedBeanTypeId(id); setCharacter(null) }}
+          onSelect={(id) => { setSelectedBeanTypeId(id) }}
           onNext={() => setStep(1)}
         />
       )}
