@@ -99,6 +99,7 @@ export default function FarmScreen() {
 
     return {
       id: b.id,
+      characterId: c.id,
       jarLabel: b.jarLabel,
       status: statusInfo?.status ?? b.status,
       beanName: bt.name,
@@ -213,6 +214,7 @@ export default function FarmScreen() {
 
 type BatchDisplay = {
   id: string
+  characterId?: string
   jarLabel: string
   status: string
   beanName: string
@@ -245,6 +247,7 @@ function FunView({ batches, gemmaTip, onOpenGenie }: { batches: BatchDisplay[]; 
           batch={batch}
           onPress={() => router.push({ pathname: '/batch/[id]', params: { id: batch.id } })}
           onRinseLog={() => router.push({ pathname: '/batch/[id]', params: { id: batch.id } })}
+          onCharacterPress={batch.characterId ? () => router.push({ pathname: '/character/[id]', params: { id: batch.characterId! } }) : undefined}
         />
       ))}
 

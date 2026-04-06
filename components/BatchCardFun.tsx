@@ -10,6 +10,7 @@ import Svg, { Circle } from 'react-native-svg'
 interface BatchCardFunProps {
   batch: {
     id: string
+    characterId?: string
     jarLabel: string
     status: string
     beanName: string
@@ -27,6 +28,7 @@ interface BatchCardFunProps {
   }
   onPress: () => void
   onRinseLog: () => void
+  onCharacterPress?: () => void
 }
 
 function CircularProgress({ progress, size, color }: { progress: number; size: number; color: string }) {
@@ -53,7 +55,7 @@ function CircularProgress({ progress, size, color }: { progress: number; size: n
   )
 }
 
-export function BatchCardFun({ batch, onPress, onRinseLog }: BatchCardFunProps) {
+export function BatchCardFun({ batch, onPress, onRinseLog, onCharacterPress }: BatchCardFunProps) {
   const progress = Math.min(batch.dayNumber / batch.totalDays, 1)
   const isOverdue = batch.isOverdue ?? false
   const daysLeft = Math.max(0, batch.totalDays - batch.dayNumber)
@@ -87,8 +89,13 @@ export function BatchCardFun({ batch, onPress, onRinseLog }: BatchCardFunProps) 
       }}
     >
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-        {/* Character avatar with circular progress ring */}
-        <View style={{ width: 72, height: 72, alignItems: 'center', justifyContent: 'center', marginRight: 14 }}>
+        {/* Character avatar with circular progress ring — tap to open profile */}
+        <TouchableOpacity
+          activeOpacity={0.8}
+          onPress={(e) => { e.stopPropagation(); onCharacterPress?.() }}
+          disabled={!onCharacterPress}
+          style={{ width: 72, height: 72, alignItems: 'center', justifyContent: 'center', marginRight: 14 }}
+        >
           <CircularProgress progress={progress} size={72} color={cfg.accent} />
           <CharacterAvatar
             faceColor={batch.faceColor}
@@ -100,7 +107,7 @@ export function BatchCardFun({ batch, onPress, onRinseLog }: BatchCardFunProps) 
             animation={isOverdue ? 'distress' : batch.status === 'ready' ? 'celebrate' : 'idle'}
             distressMouth="o"
           />
-        </View>
+        </TouchableOpacity>
 
         {/* Info section */}
         <View style={{ flex: 1 }}>

@@ -91,6 +91,7 @@ function RootLayoutNav() {
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="batch/new" options={{ title: 'New Batch', presentation: 'modal' }} />
           <Stack.Screen name="batch/[id]" options={{ title: 'Batch Detail' }} />
+          <Stack.Screen name="character/[id]" options={{ headerShown: false, presentation: 'card' }} />
           <Stack.Screen name="onboarding/index" options={{ headerShown: false }} />
           <Stack.Screen name="settings" options={{ title: 'Settings' }} />
         </Stack>
