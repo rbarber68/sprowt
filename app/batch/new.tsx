@@ -594,56 +594,76 @@ function Step4CharacterReveal({
     '#e5e7eb'
 
   return (
-    <ScrollView style={{ flex: 1, paddingHorizontal: 16 }} contentContainerStyle={{ alignItems: 'center' }}>
-      <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#27500A', marginBottom: 24, textAlign: 'center' }}>
-        Meet your sprout companion!
-      </Text>
-
-      {/* Character card */}
-      <View style={{
-        width: '100%',
-        borderRadius: 12,
-        padding: 24,
-        alignItems: 'center',
-        marginBottom: 24,
-        borderWidth: 2,
-        borderColor: cardBorderColor,
-        backgroundColor: cardBgColor,
-      }}>
-        <CharacterAvatar
-          faceColor={character.faceColor}
-          eyeColor={character.eyeColor}
-          eyeShape={character.eyeShape}
-          mouth={character.mouth}
-          accessoryEmoji={character.accessoryEmoji}
-          size={88}
-          animation="reveal"
-        />
-        <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#27500A', marginTop: 16 }}>{character.name}</Text>
-
-        {/* Rarity badge */}
-        <View style={{ paddingHorizontal: 12, paddingVertical: 4, borderRadius: 20, marginTop: 8, backgroundColor: badgeBgColor }}>
-          <Text style={{ fontSize: 12, fontWeight: 'bold', textTransform: 'uppercase' }}>{character.rarity}</Text>
+    <ScrollView style={{ flex: 1, backgroundColor: cardBgColor }} contentContainerStyle={{ paddingBottom: 32 }}>
+      {/* Big hero avatar area */}
+      <View style={{ alignItems: 'center', paddingTop: 32, paddingBottom: 24 }}>
+        <View style={{
+          width: 140, height: 140, borderRadius: 70,
+          backgroundColor: character.faceColor + '30',
+          alignItems: 'center', justifyContent: 'center',
+          borderWidth: 3, borderColor: cardBorderColor,
+          shadowColor: cardBorderColor, shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.3, shadowRadius: 16, elevation: 8,
+        }}>
+          <CharacterAvatar
+            faceColor={character.faceColor}
+            eyeColor={character.eyeColor}
+            eyeShape={character.eyeShape}
+            mouth={character.mouth}
+            accessoryEmoji={character.accessoryEmoji}
+            size={100}
+            animation="reveal"
+          />
         </View>
 
-        <Text style={{ fontSize: 14, color: '#3B6D11', marginTop: 8 }}>{character.personalityLabel}</Text>
-        <Text style={{ fontSize: 14, color: '#6b7280', fontStyle: 'italic', marginTop: 12, textAlign: 'center' }}>
+        <Text style={{ fontSize: 26, fontWeight: 'bold', color: '#27500A', marginTop: 16 }}>{character.name}</Text>
+
+        {/* Rarity badge */}
+        <View style={{
+          paddingHorizontal: 16, paddingVertical: 5, borderRadius: 20, marginTop: 8,
+          backgroundColor: badgeBgColor,
+          shadowColor: badgeBgColor, shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.4, shadowRadius: 8, elevation: 4,
+        }}>
+          <Text style={{ fontSize: 12, fontWeight: 'bold', textTransform: 'uppercase',
+            color: character.rarity === 'common' ? '#374151' : '#fff' }}>{character.rarity}</Text>
+        </View>
+
+        <Text style={{ fontSize: 15, color: '#3B6D11', marginTop: 8, fontWeight: '600' }}>{character.personalityLabel}</Text>
+      </View>
+
+      {/* Catchphrase card */}
+      <View style={{ marginHorizontal: 20, backgroundColor: '#fff', borderRadius: 16, padding: 20, marginBottom: 16,
+        shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8, elevation: 2 }}>
+        <Text style={{ fontSize: 15, color: '#6b7280', fontStyle: 'italic', textAlign: 'center', lineHeight: 22 }}>
           "{character.catchphrase}"
         </Text>
+      </View>
 
-        {/* Traits */}
-        <View style={{ width: '100%', marginTop: 16, paddingTop: 16, borderTopWidth: 1, borderTopColor: '#e5e7eb' }}>
-          <TraitRow label="Voice" value={character.voiceStyle} />
-          <TraitRow label="Secret fear" value={character.secretFear} />
-          <TraitRow label="Hidden talent" value={character.hiddenTalent} />
-          <TraitRow label="Water attitude" value={character.waterAttitude} />
+      {/* Traits as tag pills */}
+      <View style={{ marginHorizontal: 20, marginBottom: 16 }}>
+        <Text style={{ fontSize: 11, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 10 }}>Character Traits</Text>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+          {[
+            { icon: '\ud83c\udf99\ufe0f', label: character.voiceStyle },
+            { icon: '\ud83d\ude28', label: `Fears: ${character.secretFear}` },
+            { icon: '\u2728', label: character.hiddenTalent },
+            { icon: '\ud83d\udca7', label: character.waterAttitude },
+          ].map((trait, i) => (
+            <View key={i} style={{ backgroundColor: '#fff', borderRadius: 12, paddingHorizontal: 12, paddingVertical: 8,
+              borderWidth: 1, borderColor: '#e5e7eb', flexDirection: 'row', alignItems: 'center' }}>
+              <Text style={{ fontSize: 14, marginRight: 6 }}>{trait.icon}</Text>
+              <Text style={{ fontSize: 12, color: '#4b5563', flexShrink: 1 }}>{trait.label}</Text>
+            </View>
+          ))}
         </View>
       </View>
 
-      <View style={{ flexDirection: 'row', gap: 12, width: '100%', marginBottom: 16 }}>
+      {/* Action buttons */}
+      <View style={{ flexDirection: 'row', gap: 12, marginHorizontal: 20, marginTop: 8 }}>
         <TouchableOpacity
           activeOpacity={0.7}
-          style={{ flex: 1, paddingVertical: 12, borderRadius: 12, alignItems: 'center', borderWidth: 1, borderColor: '#d1d5db' }}
+          style={{ flex: 1, paddingVertical: 14, borderRadius: 14, alignItems: 'center', borderWidth: 1, borderColor: '#d1d5db', backgroundColor: '#fff' }}
           onPress={onBack}
         >
           <Text style={{ color: '#6b7280', fontWeight: '500' }}>Back</Text>

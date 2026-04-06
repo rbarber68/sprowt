@@ -217,18 +217,15 @@ function FunView({ batches, gemmaTip, onOpenGenie }: { batches: BatchDisplay[]; 
 
   return (
     <ScrollView style={{ flex: 1, paddingHorizontal: 16 }}>
-      {/* Batch cards - 2 columns */}
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' }}>
-        {batches.map(batch => (
-          <View key={batch.id} style={{ width: '48%' }}>
-            <BatchCardFun
-              batch={batch}
-              onPress={() => router.push({ pathname: '/batch/[id]', params: { id: batch.id } })}
-              onRinseLog={() => router.push({ pathname: '/batch/[id]', params: { id: batch.id } })}
-            />
-          </View>
-        ))}
-      </View>
+      {/* Batch cards - full width */}
+      {batches.map(batch => (
+        <BatchCardFun
+          key={batch.id}
+          batch={batch}
+          onPress={() => router.push({ pathname: '/batch/[id]', params: { id: batch.id } })}
+          onRinseLog={() => router.push({ pathname: '/batch/[id]', params: { id: batch.id } })}
+        />
+      ))}
 
       {/* Gemma bubble */}
       <GemmaBubble

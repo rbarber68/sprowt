@@ -1,10 +1,11 @@
 /**
  * SproutPal — Fun Mode Batch Card
- * Shows character avatar, name, stage, progress bar, status badge
+ * Full-width card with character avatar, circular progress, stage info
  */
 
 import { View, Text, TouchableOpacity } from 'react-native'
 import { CharacterAvatar } from './CharacterAvatar'
+import Svg, { Circle } from 'react-native-svg'
 
 interface BatchCardFunProps {
   batch: {
@@ -28,106 +29,126 @@ interface BatchCardFunProps {
   onRinseLog: () => void
 }
 
+function CircularProgress({ progress, size, color }: { progress: number; size: number; color: string }) {
+  const strokeWidth = 4
+  const radius = (size - strokeWidth) / 2
+  const circumference = 2 * Math.PI * radius
+  const strokeDashoffset = circumference * (1 - Math.min(progress, 1))
+
+  return (
+    <Svg width={size} height={size} style={{ position: 'absolute' }}>
+      <Circle
+        cx={size / 2} cy={size / 2} r={radius}
+        stroke="#e5e7eb" strokeWidth={strokeWidth} fill="none"
+      />
+      <Circle
+        cx={size / 2} cy={size / 2} r={radius}
+        stroke={color} strokeWidth={strokeWidth} fill="none"
+        strokeDasharray={`${circumference}`}
+        strokeDashoffset={strokeDashoffset}
+        strokeLinecap="round"
+        rotation="-90" origin={`${size / 2}, ${size / 2}`}
+      />
+    </Svg>
+  )
+}
+
 export function BatchCardFun({ batch, onPress, onRinseLog }: BatchCardFunProps) {
   const progress = Math.min(batch.dayNumber / batch.totalDays, 1)
   const isOverdue = batch.isOverdue ?? false
+  const daysLeft = Math.max(0, batch.totalDays - batch.dayNumber)
 
-  const cardStyle = isOverdue
-    ? { borderColor: '#993C1D', backgroundColor: '#FAECE7' }
-    : batch.status === 'ready'
-    ? { borderColor: '#97C459', backgroundColor: '#EAF3DE' }
-    : batch.status === 'soaking'
-    ? { borderColor: '#EF9F27', backgroundColor: '#FAEEDA' }
-    : { borderColor: '#e5e7eb', backgroundColor: '#ffffff' }
+  const statusConfig: Record<string, { bg: string; border: string; accent: string; label: string; labelBg: string; labelText: string }> = {
+    soaking:   { bg: '#FAEEDA', border: '#EF9F27', accent: '#EF9F27', label: 'Soaking',      labelBg: '#FAC775', labelText: '#633806' },
+    growing:   { bg: '#ffffff', border: '#e5e7eb', accent: '#639922', label: 'Growing',       labelBg: '#C0DD97', labelText: '#27500A' },
+    ready:     { bg: '#EAF3DE', border: '#97C459', accent: '#3B6D11', label: 'HARVEST NOW',   labelBg: '#3B6D11', labelText: '#ffffff' },
+    harvested: { bg: '#f9fafb', border: '#e5e7eb', accent: '#9ca3af', label: 'Harvested',     labelBg: '#e5e7eb', labelText: '#4b5563' },
+  }
+
+  const overdueCfg = { bg: '#FAECE7', border: '#F0997B', accent: '#D85A30', label: 'Needs rinse!', labelBg: '#D85A30', labelText: '#ffffff' }
+  const cfg = isOverdue ? overdueCfg : (statusConfig[batch.status] ?? statusConfig.growing)
 
   return (
     <TouchableOpacity
       activeOpacity={0.7}
-      style={{
-        borderWidth: 1,
-        borderRadius: 12,
-        padding: 12,
-        marginBottom: 12,
-        ...cardStyle,
-      }}
       onPress={onPress}
+      style={{
+        backgroundColor: cfg.bg,
+        borderWidth: 1.5,
+        borderColor: cfg.border,
+        borderRadius: 16,
+        padding: 16,
+        marginBottom: 12,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.06,
+        shadowRadius: 8,
+        elevation: 2,
+      }}
     >
-      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
-        <CharacterAvatar
-          faceColor={batch.faceColor}
-          eyeColor={batch.eyeColor}
-          eyeShape={batch.eyeShape}
-          mouth={batch.mouth}
-          accessoryEmoji={batch.accessoryEmoji}
-          size={48}
-          animation={isOverdue ? 'distress' : 'idle'}
-          distressMouth="o"
-        />
-        <View style={{ marginLeft: 12, flex: 1 }}>
-          <Text style={{ fontWeight: 'bold', color: '#27500A' }}>{batch.characterName}</Text>
-          <Text style={{ fontSize: 14, color: '#6b7280' }}>
-            {batch.beanEmoji} {batch.beanName} · {batch.jarLabel}
+      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        {/* Character avatar with circular progress ring */}
+        <View style={{ width: 72, height: 72, alignItems: 'center', justifyContent: 'center', marginRight: 14 }}>
+          <CircularProgress progress={progress} size={72} color={cfg.accent} />
+          <CharacterAvatar
+            faceColor={batch.faceColor}
+            eyeColor={batch.eyeColor}
+            eyeShape={batch.eyeShape}
+            mouth={batch.mouth}
+            accessoryEmoji={batch.accessoryEmoji}
+            size={52}
+            animation={isOverdue ? 'distress' : batch.status === 'ready' ? 'celebrate' : 'idle'}
+            distressMouth="o"
+          />
+        </View>
+
+        {/* Info section */}
+        <View style={{ flex: 1 }}>
+          {/* Name + status badge row */}
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
+            <Text style={{ fontWeight: 'bold', color: '#27500A', fontSize: 16, flex: 1 }} numberOfLines={1}>
+              {batch.characterName}
+            </Text>
+            <View style={{ backgroundColor: cfg.labelBg, paddingHorizontal: 10, paddingVertical: 3, borderRadius: 12 }}>
+              <Text style={{ color: cfg.labelText, fontSize: 11, fontWeight: 'bold' }}>{cfg.label}</Text>
+            </View>
+          </View>
+
+          {/* Sprout type + jar */}
+          <Text style={{ fontSize: 13, color: '#6b7280', marginBottom: 6 }}>
+            {batch.beanEmoji} {batch.beanName} {'\u00b7'} {batch.jarLabel}
           </Text>
+
+          {/* Progress bar + days */}
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <View style={{ flex: 1, height: 6, backgroundColor: '#e5e7eb', borderRadius: 3 }}>
+              <View style={{ height: 6, backgroundColor: cfg.accent, borderRadius: 3, width: `${progress * 100}%` }} />
+            </View>
+            <Text style={{ fontSize: 12, color: '#6b7280', fontWeight: '500', minWidth: 50, textAlign: 'right' }}>
+              {batch.status === 'ready' ? 'Ready!' : batch.status === 'soaking' ? 'Soaking' : `${daysLeft}d left`}
+            </Text>
+          </View>
         </View>
       </View>
 
-      {/* Progress bar */}
-      <View style={{ height: 8, backgroundColor: '#e5e7eb', borderRadius: 9999, marginBottom: 8 }}>
-        <View
-          style={{ height: 8, backgroundColor: '#639922', borderRadius: 9999, width: `${progress * 100}%` }}
-        />
-      </View>
-
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Text style={{ fontSize: 12, color: '#6b7280' }}>
-          Day {batch.dayNumber} of {batch.totalDays}
-        </Text>
-        <StatusBadge status={batch.status} isOverdue={isOverdue} />
-      </View>
-
+      {/* Quick action button */}
       {batch.status === 'growing' && (
         <TouchableOpacity
           activeOpacity={0.7}
+          onPress={onRinseLog}
           style={{
-            marginTop: 8,
+            marginTop: 10,
             backgroundColor: '#E6F1FB',
             borderWidth: 1,
             borderColor: '#85B7EB',
-            borderRadius: 20,
-            paddingVertical: 4,
-            paddingHorizontal: 12,
-            alignSelf: 'flex-start',
+            borderRadius: 10,
+            paddingVertical: 8,
+            alignItems: 'center',
           }}
-          onPress={onRinseLog}
         >
-          <Text style={{ color: '#185FA5', fontSize: 12, fontWeight: '500' }}>Log rinse</Text>
+          <Text style={{ color: '#185FA5', fontSize: 13, fontWeight: '600' }}>{'\ud83d\udca7'} Log Rinse</Text>
         </TouchableOpacity>
       )}
     </TouchableOpacity>
-  )
-}
-
-function StatusBadge({ status, isOverdue }: { status: string; isOverdue: boolean }) {
-  if (isOverdue) {
-    return (
-      <View style={{ backgroundColor: '#F0997B', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 20 }}>
-        <Text style={{ color: '#712B13', fontSize: 12, fontWeight: 'bold' }}>Rinse me!</Text>
-      </View>
-    )
-  }
-
-  const config: Record<string, { bg: string; text: string; label: string }> = {
-    soaking:   { bg: '#FAC775', text: '#633806',  label: 'Soaking' },
-    growing:   { bg: '#C0DD97', text: '#27500A',  label: 'Growing' },
-    ready:     { bg: '#97C459', text: '#ffffff',  label: 'HARVEST NOW' },
-    harvested: { bg: '#e5e7eb', text: '#4b5563',  label: 'Harvested' },
-  }
-
-  const c = config[status] ?? config.growing
-
-  return (
-    <View style={{ backgroundColor: c.bg, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 20 }}>
-      <Text style={{ color: c.text, fontSize: 12, fontWeight: 'bold' }}>{c.label}</Text>
-    </View>
   )
 }
