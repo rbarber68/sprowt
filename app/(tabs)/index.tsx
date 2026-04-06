@@ -13,6 +13,7 @@ import { BatchCardFun } from '@/components/BatchCardFun'
 import { BatchCardBusiness } from '@/components/BatchCardBusiness'
 import { GemmaBubble } from '@/components/GemmaBubble'
 import { GenieChat } from '@/components/GenieChat'
+import { DailyBriefing, shouldShowDailyBriefing, markDailyBriefingShown } from '@/components/DailyBriefing'
 
 type BatchRow = {
   batches: typeof batches.$inferSelect
@@ -27,6 +28,7 @@ export default function FarmScreen() {
   const [loading, setLoading] = useState(true)
   const [gemmaTip, setGemmaTip] = useState<string | null>(null)
   const [notifDenied, setNotifDenied] = useState(false)
+  const [showBriefing, setShowBriefing] = useState(false)
   const [showGenie, setShowGenie] = useState(false)
 
   useFocusEffect(
@@ -43,6 +45,11 @@ export default function FarmScreen() {
       // Check notification permission
       const { status } = await Notifications.getPermissionsAsync()
       setNotifDenied(status !== 'granted')
+
+      // Show daily briefing once per day
+      if (shouldShowDailyBriefing()) {
+        setShowBriefing(true)
+      }
 
       // Check and update batch statuses (soaking→growing, growing→ready)
       const statuses = await checkBatchStatuses()
@@ -143,13 +150,22 @@ export default function FarmScreen() {
             {' · '}{activeBatches.length} active
           </Text>
         </View>
-        <TouchableOpacity
-          activeOpacity={0.7}
-          style={{ backgroundColor: '#f3f4f6', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20 }}
-          onPress={toggleViewMode}
-        >
-          <Text style={{ fontSize: 12, color: '#4b5563' }}>{viewMode === 'fun' ? 'Business' : 'Fun'}</Text>
-        </TouchableOpacity>
+        <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+          <TouchableOpacity
+            activeOpacity={0.7}
+            style={{ width: 34, height: 34, borderRadius: 17, backgroundColor: '#E6F1FB', alignItems: 'center', justifyContent: 'center' }}
+            onPress={() => setShowBriefing(true)}
+          >
+            <Text style={{ fontSize: 16 }}>{'\ud83d\udcf0'}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            activeOpacity={0.7}
+            style={{ backgroundColor: '#f3f4f6', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20 }}
+            onPress={toggleViewMode}
+          >
+            <Text style={{ fontSize: 12, color: '#4b5563' }}>{viewMode === 'fun' ? 'Business' : 'Fun'}</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Notification permission denied banner */}
@@ -185,6 +201,11 @@ export default function FarmScreen() {
         visible={showGenie}
         onClose={() => setShowGenie(false)}
         screenContext={{ screen: 'farm' }}
+      />
+
+      <DailyBriefing
+        visible={showBriefing}
+        onDismiss={() => { setShowBriefing(false); markDailyBriefingShown() }}
       />
     </View>
   )
