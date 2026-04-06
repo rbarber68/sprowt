@@ -19,6 +19,8 @@ export default function SettingsScreen() {
   const [rinseTime3, setRinseTime3] = useState('23:00')
   const [apiKey, setApiKey] = useState('')
   const [showApiKey, setShowApiKey] = useState(false)
+  const [soundsMuted, setSoundsMuted] = useState(false)
+  const [ttsEnabled, setTtsEnabled] = useState(true)
 
   useEffect(() => {
     setViewMode((getKVStore(KV_KEYS.VIEW_MODE) as 'fun' | 'business') ?? 'fun')
@@ -29,6 +31,8 @@ export default function SettingsScreen() {
     setApiKey(getKVStore(KV_KEYS.GOOGLE_AI_API_KEY) ?? '')
     setCoachIntensity((getKVStore(KV_KEYS.COACH_INTENSITY) as any) ?? 'full')
     getAllContainers().then(setContainerList)
+    setSoundsMuted(getKVStore(KV_KEYS.SOUNDS_MUTED) === 'true')
+    setTtsEnabled(getKVStore(KV_KEYS.TTS_ENABLED) !== 'false')
   }, [])
 
   const toggleViewMode = () => {
@@ -164,6 +168,35 @@ export default function SettingsScreen() {
             active={notifVoice === 'character'}
             activeLabel="Character"
             inactiveLabel="Terse"
+          />
+        </SettingSection>
+
+        {/* Sound & Voice */}
+        <SettingSection title="Sound & Voice">
+          <ToggleRow
+            label={soundsMuted ? 'Sound Effects Off' : 'Sound Effects On'}
+            description="Play sounds for rinses, harvests, and character reveals"
+            onToggle={() => {
+              const next = !soundsMuted
+              setSoundsMuted(next)
+              setKVStore(KV_KEYS.SOUNDS_MUTED, String(next))
+            }}
+            active={!soundsMuted}
+            activeLabel="On"
+            inactiveLabel="Off"
+          />
+          <View className="h-3" />
+          <ToggleRow
+            label={ttsEnabled ? 'Character Voice On' : 'Character Voice Off'}
+            description="Characters read messages aloud with unique voices"
+            onToggle={() => {
+              const next = !ttsEnabled
+              setTtsEnabled(next)
+              setKVStore(KV_KEYS.TTS_ENABLED, String(!next))
+            }}
+            active={ttsEnabled}
+            activeLabel="On"
+            inactiveLabel="Off"
           />
         </SettingSection>
 

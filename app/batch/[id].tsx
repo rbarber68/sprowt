@@ -13,7 +13,9 @@ import { RinseLogger } from '@/components/RinseLogger'
 import { GemmaBubble } from '@/components/GemmaBubble'
 import { GenieChat } from '@/components/GenieChat'
 import { cancelBatchNotifications } from '@/lib/notifications'
-import { generateRinseAnalysis, isGemmaAvailable } from '@/lib/gemma'
+import { generateRinseAnalysis, generateHarvestCelebration, isGemmaAvailable } from '@/lib/gemma'
+import { HarvestCelebration } from '@/components/HarvestCelebration'
+import { playSound } from '@/lib/sounds'
 import { generateCharacter } from '@/data/characters'
 import { CameraView, useCameraPermissions } from 'expo-camera'
 import { Paths, File as ExpoFile, Directory } from 'expo-file-system/next'
@@ -27,13 +29,14 @@ export default function BatchDetailScreen() {
   const [recentLogs, setRecentLogs] = useState<(typeof dailyLogs.$inferSelect)[]>([])
   const [showRinseLogger, setShowRinseLogger] = useState(false)
   const [showHarvestModal, setShowHarvestModal] = useState(false)
-  const [harvestStep, setHarvestStep] = useState<'farewell' | 'rate'>('farewell')
+  const [harvestStep, setHarvestStep] = useState<'farewell' | 'rate' | 'celebrate'>('farewell')
   const [harvestRating, setHarvestRating] = useState(0)
   const [harvestGermination, setHarvestGermination] = useState('')
   const [harvestNotes, setHarvestNotes] = useState('')
   const [harvestWeight, setHarvestWeight] = useState('')
   const [harvestFillPct, setHarvestFillPct] = useState<number>(0)
   const [gemmaInsight, setGemmaInsight] = useState<string | null>(null)
+  const [celebrationMessage, setCelebrationMessage] = useState<string | null>(null)
   const [gemmaLoading, setGemmaLoading] = useState(false)
   const [showCamera, setShowCamera] = useState(false)
   const [showGenie, setShowGenie] = useState(false)
@@ -152,6 +155,7 @@ export default function BatchDetailScreen() {
       rinseWaterTemp: data.rinseWaterTemp ?? null,
       observations: data.observations.length > 0 ? JSON.stringify(data.observations) : null,
     })
+    playSound('water-splash')
     setShowRinseLogger(false)
     loadBatch()
 
@@ -208,8 +212,23 @@ export default function BatchDetailScreen() {
       })
       .where(eq(batches.id, batch.id))
 
-    setShowHarvestModal(false)
-    router.back()
+    // Generate celebration message in background
+    if (isGemmaAvailable() && character && beanType) {
+      const sproutData = SPROUT_TYPES.find(s => s.id === beanType.id)
+      const { getRecipesForSprout } = require('@/data/recipes')
+      const recipes = getRecipesForSprout(beanType.id)
+      generateHarvestCelebration(
+        character as any,
+        { name: beanType.name, gemmaContext: sproutData?.gemmaContext ?? '' },
+        yieldRatio,
+        yieldGrams,
+        harvestRating > 0 ? harvestRating : null,
+        recipes.map((r: any) => r.title),
+      ).then(setCelebrationMessage)
+    }
+
+    playSound('celebration-fanfare')
+    setHarvestStep('celebrate')
   }
 
   const handleDiscard = () => {
@@ -551,6 +570,20 @@ export default function BatchDetailScreen() {
               <Text className="text-white font-bold text-lg">Complete Harvest</Text>
             </Pressable>
           </ScrollView>
+        )}
+
+        {harvestStep === 'celebrate' && character && beanType && (
+          <HarvestCelebration
+            character={character as any}
+            beanTypeId={beanType.id}
+            yieldRatio={batch.yieldRatio ?? null}
+            harvestYieldGrams={batch.harvestYieldGrams ?? null}
+            seedAmountGrams={batch.seedAmountGrams ?? null}
+            userRating={harvestRating > 0 ? harvestRating : null}
+            gemmaMessage={celebrationMessage}
+            onDone={() => { setShowHarvestModal(false); router.back() }}
+            onStartNewBatch={() => { setShowHarvestModal(false); router.replace('/batch/new') }}
+          />
         )}
       </Modal>
 

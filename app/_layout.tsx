@@ -1,59 +1,100 @@
-import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
-import 'react-native-reanimated';
+import FontAwesome from '@expo/vector-icons/FontAwesome'
+import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native'
+import { useFonts } from 'expo-font'
+import { Stack, router } from 'expo-router'
+import * as SplashScreen from 'expo-splash-screen'
+import * as Notifications from 'expo-notifications'
+import { useEffect, useRef } from 'react'
+import { AppState } from 'react-native'
+import 'react-native-reanimated'
 
-import { useColorScheme } from '@/components/useColorScheme';
+import '../global.css'
+import { useColorScheme } from '@/components/useColorScheme'
+import { DatabaseProvider } from '@/components/DatabaseProvider'
+import { setupNotificationChannel, rescheduleAllActiveNotifications } from '@/lib/notifications'
+import { preloadSounds, playSound } from '@/lib/sounds'
+import { checkBatchStatuses } from '@/lib/batchStatus'
 
-export {
-  // Catch any errors thrown by the Layout component.
-  ErrorBoundary,
-} from 'expo-router';
+export { ErrorBoundary } from 'expo-router'
 
 export const unstable_settings = {
-  // Ensure that reloading on `/modal` keeps a back button present.
   initialRouteName: '(tabs)',
-};
+}
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
-SplashScreen.preventAutoHideAsync();
+SplashScreen.preventAutoHideAsync()
 
 export default function RootLayout() {
   const [loaded, error] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
     ...FontAwesome.font,
-  });
+  })
+  const appState = useRef(AppState.currentState)
 
-  // Expo Router uses Error Boundaries to catch errors in the navigation tree.
   useEffect(() => {
-    if (error) throw error;
-  }, [error]);
+    if (error) throw error
+  }, [error])
 
   useEffect(() => {
     if (loaded) {
-      SplashScreen.hideAsync();
+      SplashScreen.hideAsync()
     }
-  }, [loaded]);
+  }, [loaded])
+
+  // Set up notification channel and preload sounds on launch
+  useEffect(() => {
+    setupNotificationChannel()
+    preloadSounds()
+  }, [])
+
+  // Re-schedule notifications and check batch statuses on app foreground
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', async (nextState) => {
+      if (appState.current.match(/inactive|background/) && nextState === 'active') {
+        try {
+          await rescheduleAllActiveNotifications()
+          await checkBatchStatuses()
+        } catch (e) {
+          console.warn('Foreground check failed:', e)
+        }
+      }
+      appState.current = nextState
+    })
+    return () => sub.remove()
+  }, [])
+
+  // Handle notification taps — navigate to batch detail
+  useEffect(() => {
+    const sub = Notifications.addNotificationResponseReceivedListener(response => {
+      playSound('soft-chime')
+      const data = response.notification.request.content.data
+      if (data?.batchId) {
+        router.push({ pathname: '/batch/[id]', params: { id: data.batchId as string } })
+      }
+    })
+    return () => sub.remove()
+  }, [])
 
   if (!loaded) {
-    return null;
+    return null
   }
 
-  return <RootLayoutNav />;
+  return <RootLayoutNav />
 }
 
 function RootLayoutNav() {
-  const colorScheme = useColorScheme();
+  const colorScheme = useColorScheme()
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
-      </Stack>
+      <DatabaseProvider>
+        <Stack>
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="batch/new" options={{ title: 'New Batch', presentation: 'modal' }} />
+          <Stack.Screen name="batch/[id]" options={{ title: 'Batch Detail' }} />
+          <Stack.Screen name="onboarding/index" options={{ headerShown: false }} />
+          <Stack.Screen name="settings" options={{ title: 'Settings' }} />
+        </Stack>
+      </DatabaseProvider>
     </ThemeProvider>
-  );
+  )
 }
