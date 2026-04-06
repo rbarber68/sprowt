@@ -3,7 +3,7 @@
  * Displays AI-generated tips. Tap to open Genie chat.
  */
 
-import { View, Text, Pressable } from 'react-native'
+import { View, Text, TouchableOpacity } from 'react-native'
 
 interface GemmaBubbleProps {
   message?: string
@@ -21,20 +21,28 @@ export function GemmaBubble({
   onPress,
 }: GemmaBubbleProps) {
   const content = (
-    <View className="bg-info-50 border border-info-200 rounded-card p-4 mx-4 my-2">
-      <View className="flex-row items-center mb-2">
-        <Text className="text-lg mr-2">{characterEmoji}</Text>
-        <Text className="text-sm font-medium text-info-600">
+    <View style={{
+      backgroundColor: '#E6F1FB',
+      borderWidth: 1,
+      borderColor: '#85B7EB',
+      borderRadius: 12,
+      padding: 16,
+      marginHorizontal: 16,
+      marginVertical: 8,
+    }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
+        <Text style={{ fontSize: 18, marginRight: 8 }}>{characterEmoji}</Text>
+        <Text style={{ fontSize: 14, fontWeight: '500', color: '#185FA5' }}>
           {characterName ?? 'Sprout Genie'} says:
         </Text>
         {onPress && (
-          <Text className="ml-auto text-xs text-info-400">Tap to chat {'\u203a'}</Text>
+          <Text style={{ marginLeft: 'auto', fontSize: 12, color: '#378ADD' }}>Tap to chat {'\u203a'}</Text>
         )}
       </View>
       {isLoading ? (
-        <Text className="text-gray-400 italic">Thinking...</Text>
+        <Text style={{ color: '#9ca3af', fontStyle: 'italic' }}>Thinking...</Text>
       ) : (
-        <Text className="text-gray-700 text-sm leading-5">
+        <Text style={{ color: '#374151', fontSize: 14, lineHeight: 20 }}>
           {message ?? 'Tap to ask the Sprout Genie for advice!'}
         </Text>
       )}
@@ -42,7 +50,7 @@ export function GemmaBubble({
   )
 
   if (onPress) {
-    return <Pressable onPress={onPress}>{content}</Pressable>
+    return <TouchableOpacity activeOpacity={0.7} onPress={onPress}>{content}</TouchableOpacity>
   }
   return content
 }

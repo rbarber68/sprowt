@@ -3,7 +3,7 @@
  * Compact row: emoji | name + jar | temp range | rinse freq | day X of Y | status
  */
 
-import { View, Text, Pressable } from 'react-native'
+import { View, Text, TouchableOpacity } from 'react-native'
 
 interface BatchCardBusinessProps {
   batch: {
@@ -23,25 +23,33 @@ interface BatchCardBusinessProps {
 
 export function BatchCardBusiness({ batch, onPress }: BatchCardBusinessProps) {
   return (
-    <Pressable
-      className="flex-row items-center px-4 py-3 border-b border-gray-100"
+    <TouchableOpacity
+      activeOpacity={0.7}
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 16,
+        paddingVertical: 12,
+        borderBottomWidth: 1,
+        borderBottomColor: '#f3f4f6',
+      }}
       onPress={onPress}
     >
-      <Text className="text-2xl mr-3">{batch.beanEmoji}</Text>
-      <View className="flex-1">
-        <Text className="font-medium text-sprout-800">
+      <Text style={{ fontSize: 24, marginRight: 12 }}>{batch.beanEmoji}</Text>
+      <View style={{ flex: 1 }}>
+        <Text style={{ fontWeight: '500', color: '#27500A' }}>
           {batch.beanName} · {batch.jarLabel}
         </Text>
-        <Text className="text-xs text-gray-500">
+        <Text style={{ fontSize: 12, color: '#6b7280' }}>
           {batch.minTempF}–{batch.maxTempF}°F · {batch.rinsesPerDay}x/day
         </Text>
       </View>
-      <View className="items-end">
-        <Text className="text-sm font-medium text-sprout-600">
+      <View style={{ alignItems: 'flex-end' }}>
+        <Text style={{ fontSize: 14, fontWeight: '500', color: '#3B6D11' }}>
           Day {batch.dayNumber}/{batch.totalDays}
         </Text>
-        <Text className="text-xs text-gray-400 capitalize">{batch.status}</Text>
+        <Text style={{ fontSize: 12, color: '#9ca3af', textTransform: 'capitalize' }}>{batch.status}</Text>
       </View>
-    </Pressable>
+    </TouchableOpacity>
   )
 }

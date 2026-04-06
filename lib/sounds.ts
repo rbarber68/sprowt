@@ -1,9 +1,10 @@
 /**
  * SproutPal — Sound Effects
  * Preload and play bundled audio at key moments
+ * Uses expo-audio (expo-av is deprecated in SDK 54)
  */
 
-import { Audio } from 'expo-av'
+import { createAudioPlayer, AudioPlayer } from 'expo-audio'
 import { getKVStore, KV_KEYS } from './kvstore'
 
 type SoundName =
@@ -20,14 +21,12 @@ const SOUND_FILES: Record<SoundName, any> = {
   'alert-tone':           require('@/assets/sounds/alert-tone.mp3'),
 }
 
-const loaded: Partial<Record<SoundName, Audio.Sound>> = {}
+const players: Partial<Record<SoundName, AudioPlayer>> = {}
 
 export async function preloadSounds(): Promise<void> {
   try {
-    await Audio.setAudioModeAsync({ playsInSilentModeIOS: true })
-    for (const [name, file] of Object.entries(SOUND_FILES)) {
-      const { sound } = await Audio.Sound.createAsync(file, { shouldPlay: false })
-      loaded[name as SoundName] = sound
+    for (const [name, source] of Object.entries(SOUND_FILES)) {
+      players[name as SoundName] = createAudioPlayer(source)
     }
   } catch (e) {
     console.warn('Sound preload failed:', e)
@@ -39,10 +38,10 @@ export async function playSound(name: SoundName): Promise<void> {
     const muted = getKVStore(KV_KEYS.SOUNDS_MUTED) === 'true'
     if (muted) return
 
-    const sound = loaded[name]
-    if (sound) {
-      await sound.setPositionAsync(0)
-      await sound.playAsync()
+    const player = players[name]
+    if (player) {
+      player.seekTo(0)
+      player.play()
     }
   } catch {
     // Sound failure should never crash the app
@@ -50,7 +49,7 @@ export async function playSound(name: SoundName): Promise<void> {
 }
 
 export async function unloadSounds(): Promise<void> {
-  for (const sound of Object.values(loaded)) {
-    if (sound) await sound.unloadAsync()
+  for (const player of Object.values(players)) {
+    if (player) player.remove()
   }
 }

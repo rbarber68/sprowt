@@ -1,4 +1,4 @@
-import { View, Text, Pressable, ScrollView, TextInput, ActivityIndicator } from 'react-native'
+import { View, Text, TouchableOpacity, ScrollView, TextInput, ActivityIndicator } from 'react-native'
 import { useState, useEffect, useCallback } from 'react'
 import { router, useLocalSearchParams } from 'expo-router'
 import { uuidv4 } from '@/lib/uuid'
@@ -171,13 +171,18 @@ export default function NewBatchScreen() {
   }
 
   return (
-    <View className="flex-1 bg-white">
+    <View style={{ flex: 1, backgroundColor: '#fff' }}>
       {/* Progress dots */}
-      <View className="flex-row justify-center py-4 gap-2">
+      <View style={{ flexDirection: 'row', justifyContent: 'center', paddingVertical: 16, gap: 8 }}>
         {([0, 1, 2, 3, 4] as Step[]).map(s => (
           <View
             key={s}
-            className={`w-2.5 h-2.5 rounded-full ${s === step ? 'bg-sprout-600' : s < step ? 'bg-sprout-200' : 'bg-gray-200'}`}
+            style={{
+              width: 10,
+              height: 10,
+              borderRadius: 5,
+              backgroundColor: s === step ? '#3B6D11' : s < step ? '#97C459' : '#e5e7eb',
+            }}
           />
         ))}
       </View>
@@ -249,72 +254,68 @@ function Step1PickSprout({
   onSelect: (id: string) => void
   onNext: () => void
 }) {
-  const jarSprouts = SPROUT_TYPES.filter(s => !TRAY_SPROUTS.includes(s.id))
-  const traySprouts = SPROUT_TYPES.filter(s => TRAY_SPROUTS.includes(s.id))
+  const allSprouts = SPROUT_TYPES
 
   return (
-    <ScrollView className="flex-1 px-4">
-      <Text className="text-2xl font-bold text-sprout-800 mb-2">Pick your sprout</Text>
+    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16, paddingBottom: 40 }}>
+      <Text style={{ fontSize: 22, fontWeight: 'bold', color: '#27500A', marginBottom: 4 }}>Pick your sprout</Text>
+      <Text style={{ fontSize: 13, color: '#666', marginBottom: 16 }}>Tap to select, then hit Next.</Text>
 
-      {/* Beginner recommendation */}
-      <View className="bg-sprout-50 rounded-card p-3 mb-4">
-        <Text className="text-sm text-sprout-600">
-          Not sure? Try <Text className="font-bold">Lentils</Text> — fastest and easiest!
-        </Text>
-      </View>
-
-      {/* Jar sprouts */}
-      <Text className="text-sm font-medium text-gray-500 mb-2">Jar Sprouts</Text>
-      <View className="flex-row flex-wrap justify-between mb-4">
-        {jarSprouts.map(s => (
-          <Pressable
+      {allSprouts.map(s => {
+        const selected = selectedId === s.id
+        const isTray = TRAY_SPROUTS.includes(s.id)
+        return (
+          <TouchableOpacity
             key={s.id}
-            className={`w-[31%] rounded-card p-3 mb-2 border ${
-              selectedId === s.id ? 'bg-sprout-50 border-sprout-400' : 'bg-white border-gray-200'
-            }`}
+            activeOpacity={0.7}
             onPress={() => onSelect(s.id)}
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              padding: 14,
+              marginBottom: 8,
+              borderRadius: 14,
+              borderWidth: 2,
+              borderColor: selected ? '#639922' : '#e5e7eb',
+              backgroundColor: selected ? '#EAF3DE' : '#fff',
+            }}
           >
-            <Text className="text-2xl mb-1">{s.emoji}</Text>
-            <Text className="text-xs font-medium text-sprout-800">{s.name}</Text>
-            <Text className="text-[10px] text-gray-400">{s.growDays}d · {s.difficulty}</Text>
-          </Pressable>
-        ))}
-      </View>
+            <View style={{ width: 44, height: 44, borderRadius: 10, backgroundColor: selected ? '#3B6D11' : '#f3f4f6', alignItems: 'center', justifyContent: 'center', marginRight: 14 }}>
+              <Text style={{ fontSize: 22 }}>{s.emoji}</Text>
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontWeight: 'bold', color: '#27500A', fontSize: 15 }}>{s.name}</Text>
+              <Text style={{ color: '#888', fontSize: 11, marginTop: 2 }}>
+                {s.growDays}d {'\u00b7'} {s.difficulty} {'\u00b7'} {s.rinsesPerDay}x rinse{isTray ? ' \u00b7 tray' : ''}
+              </Text>
+            </View>
+            {selected && (
+              <View style={{ width: 26, height: 26, borderRadius: 13, backgroundColor: '#639922', alignItems: 'center', justifyContent: 'center' }}>
+                <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 14 }}>{'\u2713'}</Text>
+              </View>
+            )}
+          </TouchableOpacity>
+        )
+      })}
 
-      {/* Tray sprouts */}
-      <Text className="text-sm font-medium text-gray-500 mb-2">Tray Sprouts (need soil)</Text>
-      <View className="flex-row flex-wrap justify-between mb-4">
-        {traySprouts.map(s => (
-          <Pressable
-            key={s.id}
-            className={`w-[31%] rounded-card p-3 mb-2 border ${
-              selectedId === s.id ? 'bg-soak-50 border-soak-400' : 'bg-white border-gray-200'
-            }`}
-            onPress={() => onSelect(s.id)}
-          >
-            <Text className="text-2xl mb-1">{s.emoji}</Text>
-            <Text className="text-xs font-medium text-sprout-800">{s.name}</Text>
-            <Text className="text-[10px] text-gray-400">{s.growDays}d · {s.difficulty}</Text>
-          </Pressable>
-        ))}
-      </View>
-
-      {/* Selected summary */}
       {selectedId && (
-        <View className="bg-gray-50 rounded-card p-3 mb-4">
-          <Text className="text-sm text-gray-600">
+        <View style={{ backgroundColor: '#f9fafb', borderRadius: 12, padding: 14, marginTop: 4, marginBottom: 8 }}>
+          <Text style={{ color: '#555', fontSize: 13, lineHeight: 20 }}>
             {SPROUT_TYPES.find(s => s.id === selectedId)?.notes}
           </Text>
         </View>
       )}
 
-      <Pressable
-        className={`py-4 rounded-card items-center mb-8 ${selectedId ? 'bg-sprout-600' : 'bg-gray-300'}`}
-        onPress={onNext}
-        disabled={!selectedId}
+      <TouchableOpacity
+        activeOpacity={0.8}
+        onPress={() => { if (selectedId) onNext() }}
+        style={{
+          paddingVertical: 16, borderRadius: 14, alignItems: 'center', marginTop: 8,
+          backgroundColor: selectedId ? '#3B6D11' : '#d1d5db',
+        }}
       >
-        <Text className="text-white font-bold text-lg">Next</Text>
-      </Pressable>
+        <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 16 }}>Next</Text>
+      </TouchableOpacity>
     </ScrollView>
   )
 }
@@ -339,33 +340,46 @@ function Step2SeedSource({
   onBack: () => void
 }) {
   return (
-    <ScrollView className="flex-1 px-4">
-      <Text className="text-2xl font-bold text-sprout-800 mb-2">Seed source</Text>
-      <Text className="text-gray-500 mb-4">Optional: track where your seeds came from</Text>
+    <ScrollView style={{ flex: 1, paddingHorizontal: 16 }}>
+      <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#27500A', marginBottom: 8 }}>Seed source</Text>
+      <Text style={{ color: '#6b7280', marginBottom: 16 }}>Optional: track where your seeds came from</Text>
 
       {existingSources.length > 0 && (
-        <View className="mb-4">
-          <Text className="text-sm font-medium text-gray-500 mb-2">Previous sources</Text>
+        <View style={{ marginBottom: 16 }}>
+          <Text style={{ fontSize: 14, fontWeight: '500', color: '#6b7280', marginBottom: 8 }}>Previous sources</Text>
           {existingSources.map(src => (
-            <Pressable
+            <TouchableOpacity
               key={src.id}
-              className={`p-3 rounded-card border mb-2 ${
-                selectedSourceId === src.id ? 'bg-sprout-50 border-sprout-400' : 'border-gray-200'
-              }`}
+              activeOpacity={0.7}
+              style={{
+                padding: 12,
+                borderRadius: 12,
+                borderWidth: 1,
+                marginBottom: 8,
+                backgroundColor: selectedSourceId === src.id ? '#EAF3DE' : '#fff',
+                borderColor: selectedSourceId === src.id ? '#639922' : '#e5e7eb',
+              }}
               onPress={() => {
                 onSelectSource(selectedSourceId === src.id ? null : src.id)
                 onNewSupplier('')
               }}
             >
-              <Text className="font-medium text-sprout-800">{src.supplierName}</Text>
-            </Pressable>
+              <Text style={{ fontWeight: '500', color: '#27500A' }}>{src.supplierName}</Text>
+            </TouchableOpacity>
           ))}
         </View>
       )}
 
-      <Text className="text-sm font-medium text-gray-500 mb-2">Or add a new source</Text>
+      <Text style={{ fontSize: 14, fontWeight: '500', color: '#6b7280', marginBottom: 8 }}>Or add a new source</Text>
       <TextInput
-        className="bg-gray-100 rounded-card px-4 py-3 text-base mb-4"
+        style={{
+          backgroundColor: '#f3f4f6',
+          borderRadius: 12,
+          paddingHorizontal: 16,
+          paddingVertical: 12,
+          fontSize: 16,
+          marginBottom: 16,
+        }}
         placeholder="Supplier name (e.g., Mumm's)"
         value={newSupplier}
         onChangeText={(text) => {
@@ -375,18 +389,26 @@ function Step2SeedSource({
         placeholderTextColor="#999"
       />
 
-      <View className="flex-row gap-3 mb-8">
-        <Pressable className="flex-1 py-3 rounded-card items-center border border-gray-300" onPress={onBack}>
-          <Text className="text-gray-600 font-medium">Back</Text>
-        </Pressable>
-        <Pressable className="flex-1 py-3 rounded-card items-center bg-sprout-600" onPress={onNext}>
-          <Text className="text-white font-bold">Next</Text>
-        </Pressable>
+      <View style={{ flexDirection: 'row', gap: 12, marginBottom: 32 }}>
+        <TouchableOpacity
+          activeOpacity={0.7}
+          style={{ flex: 1, paddingVertical: 12, borderRadius: 12, alignItems: 'center', borderWidth: 1, borderColor: '#d1d5db' }}
+          onPress={onBack}
+        >
+          <Text style={{ color: '#6b7280', fontWeight: '500' }}>Back</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          activeOpacity={0.7}
+          style={{ flex: 1, paddingVertical: 12, borderRadius: 12, alignItems: 'center', backgroundColor: '#3B6D11' }}
+          onPress={onNext}
+        >
+          <Text style={{ color: '#fff', fontWeight: 'bold' }}>Next</Text>
+        </TouchableOpacity>
       </View>
 
-      <Pressable className="items-center mb-8" onPress={onNext}>
-        <Text className="text-sprout-400 text-sm">Skip seed tracking</Text>
-      </Pressable>
+      <TouchableOpacity activeOpacity={0.7} style={{ alignItems: 'center', marginBottom: 32 }} onPress={onNext}>
+        <Text style={{ color: '#639922', fontSize: 14 }}>Skip seed tracking</Text>
+      </TouchableOpacity>
     </ScrollView>
   )
 }
@@ -424,20 +446,27 @@ function Step3JarTiming({
   const harvestDate = new Date(now.getTime() + (bean.soakHours / 24 + bean.growDays) * 86400000)
 
   return (
-    <ScrollView className="flex-1 px-4">
-      <Text className="text-2xl font-bold text-sprout-800 mb-4">Jar & Timing</Text>
+    <ScrollView style={{ flex: 1, paddingHorizontal: 16 }}>
+      <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#27500A', marginBottom: 16 }}>Jar &amp; Timing</Text>
 
-      <Text className="text-sm font-medium text-gray-500 mb-2">Seed amount (grams)</Text>
-      <View className="flex-row items-center gap-2 mb-4">
+      <Text style={{ fontSize: 14, fontWeight: '500', color: '#6b7280', marginBottom: 8 }}>Seed amount (grams)</Text>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 16 }}>
         <TextInput
-          className="bg-gray-100 rounded-card px-4 py-3 text-base flex-1"
+          style={{
+            backgroundColor: '#f3f4f6',
+            borderRadius: 12,
+            paddingHorizontal: 16,
+            paddingVertical: 12,
+            fontSize: 16,
+            flex: 1,
+          }}
           value={seedAmount}
           onChangeText={onSeedAmount}
           keyboardType="numeric"
           placeholder="20"
           placeholderTextColor="#999"
         />
-        <Text className="text-sm text-gray-400">grams</Text>
+        <Text style={{ fontSize: 14, color: '#9ca3af' }}>grams</Text>
       </View>
 
       <ContainerPicker
@@ -446,59 +475,92 @@ function Step3JarTiming({
         yieldHint={yieldHint}
       />
 
-      <View className="h-3" />
+      <View style={{ height: 12 }} />
 
-      <Text className="text-sm font-medium text-gray-500 mb-2">Jar label</Text>
+      <Text style={{ fontSize: 14, fontWeight: '500', color: '#6b7280', marginBottom: 8 }}>Jar label</Text>
       <TextInput
-        className="bg-gray-100 rounded-card px-4 py-3 text-base mb-4"
+        style={{
+          backgroundColor: '#f3f4f6',
+          borderRadius: 12,
+          paddingHorizontal: 16,
+          paddingVertical: 12,
+          fontSize: 16,
+          marginBottom: 16,
+        }}
         value={jarLabel}
         onChangeText={onJarLabel}
         placeholder="Jar A"
         placeholderTextColor="#999"
       />
 
-      <Text className="text-sm font-medium text-gray-500 mb-2">When to start?</Text>
-      <View className="flex-row gap-2 mb-4">
-        <Pressable
-          className={`flex-1 py-3 rounded-card border items-center ${startNow ? 'bg-sprout-50 border-sprout-400' : 'border-gray-200'}`}
+      <Text style={{ fontSize: 14, fontWeight: '500', color: '#6b7280', marginBottom: 8 }}>When to start?</Text>
+      <View style={{ flexDirection: 'row', gap: 8, marginBottom: 16 }}>
+        <TouchableOpacity
+          activeOpacity={0.7}
+          style={{
+            flex: 1,
+            paddingVertical: 12,
+            borderRadius: 12,
+            borderWidth: 1,
+            alignItems: 'center',
+            backgroundColor: startNow ? '#EAF3DE' : '#fff',
+            borderColor: startNow ? '#639922' : '#e5e7eb',
+          }}
           onPress={() => onStartNow(true)}
         >
-          <Text className={startNow ? 'font-bold text-sprout-800' : 'text-gray-600'}>Start now</Text>
-        </Pressable>
-        <Pressable
-          className={`flex-1 py-3 rounded-card border items-center ${!startNow ? 'bg-sprout-50 border-sprout-400' : 'border-gray-200'}`}
+          <Text style={{ fontWeight: startNow ? 'bold' : '400', color: startNow ? '#27500A' : '#6b7280' }}>Start now</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          activeOpacity={0.7}
+          style={{
+            flex: 1,
+            paddingVertical: 12,
+            borderRadius: 12,
+            borderWidth: 1,
+            alignItems: 'center',
+            backgroundColor: !startNow ? '#EAF3DE' : '#fff',
+            borderColor: !startNow ? '#639922' : '#e5e7eb',
+          }}
           onPress={() => onStartNow(false)}
         >
-          <Text className={!startNow ? 'font-bold text-sprout-800' : 'text-gray-600'}>Plan for date</Text>
-        </Pressable>
+          <Text style={{ fontWeight: !startNow ? 'bold' : '400', color: !startNow ? '#27500A' : '#6b7280' }}>Plan for date</Text>
+        </TouchableOpacity>
       </View>
 
       {/* Timeline summary */}
-      <View className="bg-gray-50 rounded-card p-4 mb-4">
-        <Text className="text-sm font-medium text-sprout-800 mb-2">Timeline</Text>
-        <View className="flex-row justify-between mb-1">
-          <Text className="text-sm text-gray-500">Soak</Text>
-          <Text className="text-sm text-sprout-600">{bean.soakHours}h starting today</Text>
+      <View style={{ backgroundColor: '#f9fafb', borderRadius: 12, padding: 16, marginBottom: 16 }}>
+        <Text style={{ fontSize: 14, fontWeight: '500', color: '#27500A', marginBottom: 8 }}>Timeline</Text>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
+          <Text style={{ fontSize: 14, color: '#6b7280' }}>Soak</Text>
+          <Text style={{ fontSize: 14, color: '#3B6D11' }}>{bean.soakHours}h starting today</Text>
         </View>
-        <View className="flex-row justify-between mb-1">
-          <Text className="text-sm text-gray-500">Grow</Text>
-          <Text className="text-sm text-sprout-600">{bean.growDays} days</Text>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
+          <Text style={{ fontSize: 14, color: '#6b7280' }}>Grow</Text>
+          <Text style={{ fontSize: 14, color: '#3B6D11' }}>{bean.growDays} days</Text>
         </View>
-        <View className="flex-row justify-between">
-          <Text className="text-sm text-gray-500">Harvest</Text>
-          <Text className="text-sm font-medium text-sprout-800">
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+          <Text style={{ fontSize: 14, color: '#6b7280' }}>Harvest</Text>
+          <Text style={{ fontSize: 14, fontWeight: '500', color: '#27500A' }}>
             {harvestDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
           </Text>
         </View>
       </View>
 
-      <View className="flex-row gap-3 mb-8">
-        <Pressable className="flex-1 py-3 rounded-card items-center border border-gray-300" onPress={onBack}>
-          <Text className="text-gray-600 font-medium">Back</Text>
-        </Pressable>
-        <Pressable className="flex-1 py-3 rounded-card items-center bg-sprout-600" onPress={onNext}>
-          <Text className="text-white font-bold">Next</Text>
-        </Pressable>
+      <View style={{ flexDirection: 'row', gap: 12, marginBottom: 32 }}>
+        <TouchableOpacity
+          activeOpacity={0.7}
+          style={{ flex: 1, paddingVertical: 12, borderRadius: 12, alignItems: 'center', borderWidth: 1, borderColor: '#d1d5db' }}
+          onPress={onBack}
+        >
+          <Text style={{ color: '#6b7280', fontWeight: '500' }}>Back</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          activeOpacity={0.7}
+          style={{ flex: 1, paddingVertical: 12, borderRadius: 12, alignItems: 'center', backgroundColor: '#3B6D11' }}
+          onPress={onNext}
+        >
+          <Text style={{ color: '#fff', fontWeight: 'bold' }}>Next</Text>
+        </TouchableOpacity>
       </View>
     </ScrollView>
   )
@@ -517,18 +579,37 @@ function Step4CharacterReveal({
   onNext: () => void
   onBack: () => void
 }) {
+  const cardBorderColor =
+    character.rarity === 'legendary' ? '#EF9F27' :
+    character.rarity === 'rare' ? '#85B7EB' :
+    '#97C459'
+  const cardBgColor =
+    character.rarity === 'legendary' ? '#FAEEDA' :
+    character.rarity === 'rare' ? '#E6F1FB' :
+    '#EAF3DE'
+  const badgeBgColor =
+    character.rarity === 'legendary' ? '#EF9F27' :
+    character.rarity === 'rare' ? '#85B7EB' :
+    character.rarity === 'uncommon' ? '#97C459' :
+    '#e5e7eb'
+
   return (
-    <ScrollView className="flex-1 px-4 items-center">
-      <Text className="text-2xl font-bold text-sprout-800 mb-6 text-center">
+    <ScrollView style={{ flex: 1, paddingHorizontal: 16 }} contentContainerStyle={{ alignItems: 'center' }}>
+      <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#27500A', marginBottom: 24, textAlign: 'center' }}>
         Meet your sprout companion!
       </Text>
 
       {/* Character card */}
-      <View className={`w-full rounded-card p-6 items-center mb-6 border-2 ${
-        character.rarity === 'legendary' ? 'border-soak-200 bg-soak-50' :
-        character.rarity === 'rare' ? 'border-info-200 bg-info-50' :
-        'border-sprout-200 bg-sprout-50'
-      }`}>
+      <View style={{
+        width: '100%',
+        borderRadius: 12,
+        padding: 24,
+        alignItems: 'center',
+        marginBottom: 24,
+        borderWidth: 2,
+        borderColor: cardBorderColor,
+        backgroundColor: cardBgColor,
+      }}>
         <CharacterAvatar
           faceColor={character.faceColor}
           eyeColor={character.eyeColor}
@@ -538,25 +619,20 @@ function Step4CharacterReveal({
           size={88}
           animation="reveal"
         />
-        <Text className="text-xl font-bold text-sprout-800 mt-4">{character.name}</Text>
+        <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#27500A', marginTop: 16 }}>{character.name}</Text>
 
         {/* Rarity badge */}
-        <View className={`px-3 py-1 rounded-chip mt-2 ${
-          character.rarity === 'legendary' ? 'bg-soak-200' :
-          character.rarity === 'rare' ? 'bg-info-200' :
-          character.rarity === 'uncommon' ? 'bg-sprout-200' :
-          'bg-gray-200'
-        }`}>
-          <Text className="text-xs font-bold uppercase">{character.rarity}</Text>
+        <View style={{ paddingHorizontal: 12, paddingVertical: 4, borderRadius: 20, marginTop: 8, backgroundColor: badgeBgColor }}>
+          <Text style={{ fontSize: 12, fontWeight: 'bold', textTransform: 'uppercase' }}>{character.rarity}</Text>
         </View>
 
-        <Text className="text-sm text-sprout-600 mt-2">{character.personalityLabel}</Text>
-        <Text className="text-sm text-gray-500 italic mt-3 text-center">
+        <Text style={{ fontSize: 14, color: '#3B6D11', marginTop: 8 }}>{character.personalityLabel}</Text>
+        <Text style={{ fontSize: 14, color: '#6b7280', fontStyle: 'italic', marginTop: 12, textAlign: 'center' }}>
           "{character.catchphrase}"
         </Text>
 
         {/* Traits */}
-        <View className="w-full mt-4 pt-4 border-t border-gray-200">
+        <View style={{ width: '100%', marginTop: 16, paddingTop: 16, borderTopWidth: 1, borderTopColor: '#e5e7eb' }}>
           <TraitRow label="Voice" value={character.voiceStyle} />
           <TraitRow label="Secret fear" value={character.secretFear} />
           <TraitRow label="Hidden talent" value={character.hiddenTalent} />
@@ -564,27 +640,39 @@ function Step4CharacterReveal({
         </View>
       </View>
 
-      <View className="flex-row gap-3 w-full mb-4">
-        <Pressable className="flex-1 py-3 rounded-card items-center border border-gray-300" onPress={onBack}>
-          <Text className="text-gray-600 font-medium">Back</Text>
-        </Pressable>
-        <Pressable className="flex-1 py-3 rounded-card items-center border border-soak-400" onPress={onReroll}>
-          <Text className="text-soak-600 font-medium">Re-roll</Text>
-        </Pressable>
+      <View style={{ flexDirection: 'row', gap: 12, width: '100%', marginBottom: 16 }}>
+        <TouchableOpacity
+          activeOpacity={0.7}
+          style={{ flex: 1, paddingVertical: 12, borderRadius: 12, alignItems: 'center', borderWidth: 1, borderColor: '#d1d5db' }}
+          onPress={onBack}
+        >
+          <Text style={{ color: '#6b7280', fontWeight: '500' }}>Back</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          activeOpacity={0.7}
+          style={{ flex: 1, paddingVertical: 12, borderRadius: 12, alignItems: 'center', borderWidth: 1, borderColor: '#BA7517' }}
+          onPress={onReroll}
+        >
+          <Text style={{ color: '#BA7517', fontWeight: '500' }}>Re-roll</Text>
+        </TouchableOpacity>
       </View>
 
-      <Pressable className="w-full py-4 rounded-card items-center bg-sprout-600 mb-8" onPress={onNext}>
-        <Text className="text-white font-bold text-lg">Keep this one</Text>
-      </Pressable>
+      <TouchableOpacity
+        activeOpacity={0.7}
+        style={{ width: '100%', paddingVertical: 16, borderRadius: 12, alignItems: 'center', backgroundColor: '#3B6D11', marginBottom: 32 }}
+        onPress={onNext}
+      >
+        <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 18 }}>Keep this one</Text>
+      </TouchableOpacity>
     </ScrollView>
   )
 }
 
 function TraitRow({ label, value }: { label: string; value: string }) {
   return (
-    <View className="flex-row justify-between py-1">
-      <Text className="text-xs text-gray-400">{label}</Text>
-      <Text className="text-xs text-gray-600 flex-1 text-right">{value}</Text>
+    <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 4 }}>
+      <Text style={{ fontSize: 12, color: '#9ca3af' }}>{label}</Text>
+      <Text style={{ fontSize: 12, color: '#6b7280', flex: 1, textAlign: 'right' }}>{value}</Text>
     </View>
   )
 }
@@ -610,18 +698,18 @@ function Step5Confirm({
   const harvestDate = new Date(now.getTime() + (bean.soakHours / 24 + bean.growDays) * 86400000)
 
   return (
-    <ScrollView className="flex-1 px-4">
-      <Text className="text-2xl font-bold text-sprout-800 mb-4">Confirm your batch</Text>
+    <ScrollView style={{ flex: 1, paddingHorizontal: 16 }}>
+      <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#27500A', marginBottom: 16 }}>Confirm your batch</Text>
 
-      <View className="bg-gray-50 rounded-card p-4 mb-4">
-        <View className="flex-row items-center mb-3">
-          <Text className="text-3xl mr-3">{bean.emoji}</Text>
+      <View style={{ backgroundColor: '#f9fafb', borderRadius: 12, padding: 16, marginBottom: 16 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
+          <Text style={{ fontSize: 30, marginRight: 12 }}>{bean.emoji}</Text>
           <View>
-            <Text className="font-bold text-sprout-800">{bean.name}</Text>
-            <Text className="text-sm text-gray-500">{jarLabel}</Text>
+            <Text style={{ fontWeight: 'bold', color: '#27500A' }}>{bean.name}</Text>
+            <Text style={{ fontSize: 14, color: '#6b7280' }}>{jarLabel}</Text>
           </View>
         </View>
-        <View className="flex-row items-center mb-3">
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
           <CharacterAvatar
             faceColor={character.faceColor}
             eyeColor={character.eyeColor}
@@ -630,20 +718,20 @@ function Step5Confirm({
             accessoryEmoji={character.accessoryEmoji}
             size={32}
           />
-          <Text className="ml-2 text-sm text-gray-600">{character.name} ({character.personalityLabel})</Text>
+          <Text style={{ marginLeft: 8, fontSize: 14, color: '#6b7280' }}>{character.name} ({character.personalityLabel})</Text>
         </View>
-        <View className="border-t border-gray-200 pt-2">
-          <View className="flex-row justify-between mb-1">
-            <Text className="text-sm text-gray-500">Start soak</Text>
-            <Text className="text-sm text-sprout-800">Now</Text>
+        <View style={{ borderTopWidth: 1, borderTopColor: '#e5e7eb', paddingTop: 8 }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
+            <Text style={{ fontSize: 14, color: '#6b7280' }}>Start soak</Text>
+            <Text style={{ fontSize: 14, color: '#27500A' }}>Now</Text>
           </View>
-          <View className="flex-row justify-between mb-1">
-            <Text className="text-sm text-gray-500">Drain to jar</Text>
-            <Text className="text-sm text-sprout-800">In {bean.soakHours}h</Text>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
+            <Text style={{ fontSize: 14, color: '#6b7280' }}>Drain to jar</Text>
+            <Text style={{ fontSize: 14, color: '#27500A' }}>In {bean.soakHours}h</Text>
           </View>
-          <View className="flex-row justify-between">
-            <Text className="text-sm text-gray-500">Target harvest</Text>
-            <Text className="text-sm font-medium text-sprout-800">
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+            <Text style={{ fontSize: 14, color: '#6b7280' }}>Target harvest</Text>
+            <Text style={{ fontSize: 14, fontWeight: '500', color: '#27500A' }}>
               {harvestDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
             </Text>
           </View>
@@ -651,27 +739,39 @@ function Step5Confirm({
       </View>
 
       {/* Rinse schedule */}
-      <View className="bg-info-50 border border-info-200 rounded-card p-4 mb-6">
-        <Text className="text-sm font-medium text-info-600 mb-2">Rinse reminders</Text>
-        <Text className="text-sm text-gray-600">7:00 AM · 3:00 PM · 11:00 PM</Text>
-        <Text className="text-xs text-gray-400 mt-1">Change default times in Settings</Text>
+      <View style={{
+        backgroundColor: '#E6F1FB',
+        borderWidth: 1,
+        borderColor: '#85B7EB',
+        borderRadius: 12,
+        padding: 16,
+        marginBottom: 24,
+      }}>
+        <Text style={{ fontSize: 14, fontWeight: '500', color: '#185FA5', marginBottom: 8 }}>Rinse reminders</Text>
+        <Text style={{ fontSize: 14, color: '#6b7280' }}>7:00 AM · 3:00 PM · 11:00 PM</Text>
+        <Text style={{ fontSize: 12, color: '#9ca3af', marginTop: 4 }}>Change default times in Settings</Text>
       </View>
 
-      <View className="flex-row gap-3 mb-8">
-        <Pressable className="flex-1 py-3 rounded-card items-center border border-gray-300" onPress={onBack}>
-          <Text className="text-gray-600 font-medium">Back</Text>
-        </Pressable>
-        <Pressable
-          className={`flex-1 py-4 rounded-card items-center ${saving ? 'bg-gray-400' : 'bg-sprout-600'}`}
+      <View style={{ flexDirection: 'row', gap: 12, marginBottom: 32 }}>
+        <TouchableOpacity
+          activeOpacity={0.7}
+          style={{ flex: 1, paddingVertical: 12, borderRadius: 12, alignItems: 'center', borderWidth: 1, borderColor: '#d1d5db' }}
+          onPress={onBack}
+        >
+          <Text style={{ color: '#6b7280', fontWeight: '500' }}>Back</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          activeOpacity={0.7}
+          style={{ flex: 1, paddingVertical: saving ? 12 : 16, borderRadius: 12, alignItems: 'center', backgroundColor: saving ? '#9ca3af' : '#3B6D11' }}
           onPress={onConfirm}
           disabled={saving}
         >
           {saving ? (
             <ActivityIndicator color="white" />
           ) : (
-            <Text className="text-white font-bold text-lg">Start Batch</Text>
+            <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 18 }}>Start Batch</Text>
           )}
-        </Pressable>
+        </TouchableOpacity>
       </View>
     </ScrollView>
   )

@@ -44,27 +44,27 @@ export function DatabaseProvider({ children }: PropsWithChildren) {
 
   if (error) {
     return (
-      <View className="flex-1 items-center justify-center bg-white p-6">
-        <Text className="text-xl font-bold text-alert-600 mb-2">Database Error</Text>
-        <Text className="text-gray-500 text-center">{error.message}</Text>
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#ffffff', padding: 24 }}>
+        <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#993C1D', marginBottom: 8 }}>Database Error</Text>
+        <Text style={{ color: '#6b7280', textAlign: 'center' }}>{error.message}</Text>
       </View>
     )
   }
 
   if (seedError) {
     return (
-      <View className="flex-1 items-center justify-center bg-white p-6">
-        <Text className="text-xl font-bold text-alert-600 mb-2">Setup Error</Text>
-        <Text className="text-gray-500 text-center">{seedError}</Text>
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#ffffff', padding: 24 }}>
+        <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#993C1D', marginBottom: 8 }}>Setup Error</Text>
+        <Text style={{ color: '#6b7280', textAlign: 'center' }}>{seedError}</Text>
       </View>
     )
   }
 
   if (!success || !seeded) {
     return (
-      <View className="flex-1 items-center justify-center bg-sprout-50">
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#EAF3DE' }}>
         <ActivityIndicator size="large" color="#3B6D11" />
-        <Text className="text-sprout-600 mt-4">Setting up SproutPal...</Text>
+        <Text style={{ color: '#3B6D11', marginTop: 16 }}>Setting up SproutPal...</Text>
       </View>
     )
   }

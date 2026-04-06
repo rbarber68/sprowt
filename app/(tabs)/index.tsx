@@ -1,4 +1,4 @@
-import { View, Text, Pressable, ScrollView, Linking } from 'react-native'
+import { View, Text, TouchableOpacity, ScrollView, Linking } from 'react-native'
 import { Link, router, useFocusEffect } from 'expo-router'
 import { useCallback, useState } from 'react'
 import * as Notifications from 'expo-notifications'
@@ -115,53 +115,55 @@ export default function FarmScreen() {
   // Empty state
   if (!loading && activeBatches.length === 0) {
     return (
-      <View className="flex-1 bg-sprout-50 items-center justify-center p-6">
-        <Text className="text-7xl mb-4">🌱</Text>
-        <Text className="text-2xl font-bold text-sprout-800 mb-2">Your Farm is Empty</Text>
-        <Text className="text-base text-sprout-600 text-center mb-8">
+      <View style={{ flex: 1, backgroundColor: '#EAF3DE', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+        <Text style={{ fontSize: 72, marginBottom: 16 }}>🌱</Text>
+        <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#27500A', marginBottom: 8 }}>Your Farm is Empty</Text>
+        <Text style={{ fontSize: 16, color: '#3B6D11', textAlign: 'center', marginBottom: 32 }}>
           Start your first batch to begin growing!
         </Text>
         <Link href="/batch/new" asChild>
-          <Pressable className="bg-sprout-600 px-8 py-4 rounded-card">
-            <Text className="text-white font-bold text-lg">Start Your First Batch</Text>
-          </Pressable>
+          <TouchableOpacity activeOpacity={0.7} style={{ backgroundColor: '#3B6D11', paddingHorizontal: 32, paddingVertical: 16, borderRadius: 12 }}>
+            <Text style={{ color: '#ffffff', fontWeight: 'bold', fontSize: 18 }}>Start Your First Batch</Text>
+          </TouchableOpacity>
         </Link>
       </View>
     )
   }
 
   return (
-    <View className="flex-1 bg-white">
+    <View style={{ flex: 1, backgroundColor: '#ffffff' }}>
       {/* Header */}
-      <View className="flex-row justify-between items-center px-4 pt-2 pb-3">
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, paddingTop: 8, paddingBottom: 12 }}>
         <View>
-          <Text className="text-xl font-bold text-sprout-800">
+          <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#27500A' }}>
             {viewMode === 'fun' ? 'Your sprout crew' : 'Dashboard'}
           </Text>
-          <Text className="text-xs text-gray-400">
+          <Text style={{ fontSize: 12, color: '#9ca3af' }}>
             {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
             {' · '}{activeBatches.length} active
           </Text>
         </View>
-        <Pressable
-          className="bg-gray-100 px-3 py-1.5 rounded-chip"
+        <TouchableOpacity
+          activeOpacity={0.7}
+          style={{ backgroundColor: '#f3f4f6', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20 }}
           onPress={toggleViewMode}
         >
-          <Text className="text-xs text-gray-600">{viewMode === 'fun' ? 'Business' : 'Fun'}</Text>
-        </Pressable>
+          <Text style={{ fontSize: 12, color: '#4b5563' }}>{viewMode === 'fun' ? 'Business' : 'Fun'}</Text>
+        </TouchableOpacity>
       </View>
 
       {/* Notification permission denied banner */}
       {notifDenied && activeBatches.length > 0 && (
-        <Pressable
-          className="mx-4 mb-2 bg-soak-50 border border-soak-200 rounded-card p-3 flex-row items-center"
+        <TouchableOpacity
+          activeOpacity={0.7}
+          style={{ marginHorizontal: 16, marginBottom: 8, backgroundColor: '#FAEEDA', borderWidth: 1, borderColor: '#EF9F27', borderRadius: 12, padding: 12, flexDirection: 'row', alignItems: 'center' }}
           onPress={() => Linking.openSettings()}
         >
-          <Text className="text-soak-600 text-sm flex-1">
+          <Text style={{ color: '#b45309', fontSize: 14, flex: 1 }}>
             Notifications are off. Tap to enable rinse reminders.
           </Text>
-          <Text className="text-soak-400 text-xs ml-2">Settings {'\u203a'}</Text>
-        </Pressable>
+          <Text style={{ color: '#d97706', fontSize: 12, marginLeft: 8 }}>Settings {'\u203a'}</Text>
+        </TouchableOpacity>
       )}
 
       {viewMode === 'fun' ? (
@@ -171,12 +173,13 @@ export default function FarmScreen() {
       )}
 
       {/* FAB */}
-      <Pressable
-        className="absolute bottom-6 right-6 w-14 h-14 rounded-full bg-sprout-600 items-center justify-center shadow-lg"
+      <TouchableOpacity
+        activeOpacity={0.7}
+        style={{ position: 'absolute', bottom: 24, right: 24, width: 56, height: 56, borderRadius: 28, backgroundColor: '#3B6D11', alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.3, shadowRadius: 4, elevation: 5 }}
         onPress={() => router.push('/batch/new')}
       >
-        <Text className="text-white text-2xl">+</Text>
-      </Pressable>
+        <Text style={{ color: '#ffffff', fontSize: 24 }}>+</Text>
+      </TouchableOpacity>
 
       <GenieChat
         visible={showGenie}
@@ -213,11 +216,11 @@ function FunView({ batches, gemmaTip, onOpenGenie }: { batches: BatchDisplay[]; 
   const urgentBatch = batches.find(b => b.isOverdue) ?? batches.find(b => b.status === 'ready') ?? batches[0]
 
   return (
-    <ScrollView className="flex-1 px-4">
+    <ScrollView style={{ flex: 1, paddingHorizontal: 16 }}>
       {/* Batch cards - 2 columns */}
-      <View className="flex-row flex-wrap justify-between">
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' }}>
         {batches.map(batch => (
-          <View key={batch.id} className="w-[48%]">
+          <View key={batch.id} style={{ width: '48%' }}>
             <BatchCardFun
               batch={batch}
               onPress={() => router.push({ pathname: '/batch/[id]', params: { id: batch.id } })}
@@ -236,18 +239,18 @@ function FunView({ batches, gemmaTip, onOpenGenie }: { batches: BatchDisplay[]; 
       />
 
       {/* Today's reminders */}
-      <View className="mt-2 mb-4">
-        <Text className="text-sm font-medium text-gray-500 mb-2">Today's schedule</Text>
-        <View className="flex-row gap-2">
+      <View style={{ marginTop: 8, marginBottom: 16 }}>
+        <Text style={{ fontSize: 14, fontWeight: '500', color: '#6b7280', marginBottom: 8 }}>Today's schedule</Text>
+        <View style={{ flexDirection: 'row', gap: 8 }}>
           {['7:00 AM', '3:00 PM', '11:00 PM'].map(time => (
-            <View key={time} className="bg-sprout-50 px-3 py-1.5 rounded-chip">
-              <Text className="text-xs text-sprout-600">{time} rinse</Text>
+            <View key={time} style={{ backgroundColor: '#EAF3DE', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20 }}>
+              <Text style={{ fontSize: 12, color: '#3B6D11' }}>{time} rinse</Text>
             </View>
           ))}
         </View>
       </View>
 
-      <View className="h-20" />
+      <View style={{ height: 80 }} />
     </ScrollView>
   )
 }
@@ -258,16 +261,16 @@ function BusinessView({ batches }: { batches: BatchDisplay[] }) {
   const needRinse = batches.filter(b => b.isOverdue).length
 
   return (
-    <ScrollView className="flex-1">
+    <ScrollView style={{ flex: 1 }}>
       {/* Metrics strip */}
-      <View className="flex-row px-4 gap-3 mb-4">
+      <View style={{ flexDirection: 'row', paddingHorizontal: 16, gap: 12, marginBottom: 16 }}>
         <MetricCard label="Active" value={String(batches.length)} color="sprout" />
         <MetricCard label="Ready" value={String(readyCount)} color="harvest" />
         <MetricCard label="Need rinse" value={String(needRinse)} color="alert" />
       </View>
 
       {/* Batch rows */}
-      <View className="bg-white border-t border-gray-100">
+      <View style={{ backgroundColor: '#ffffff', borderTopWidth: 1, borderTopColor: '#f3f4f6' }}>
         {batches.map(batch => (
           <BatchCardBusiness
             key={batch.id}
@@ -277,27 +280,27 @@ function BusinessView({ batches }: { batches: BatchDisplay[] }) {
         ))}
       </View>
 
-      <View className="h-20" />
+      <View style={{ height: 80 }} />
     </ScrollView>
   )
 }
 
 function MetricCard({ label, value, color }: { label: string; value: string; color: string }) {
   const bgMap: Record<string, string> = {
-    sprout: 'bg-sprout-50',
-    harvest: 'bg-sprout-50',
-    alert: 'bg-alert-50',
+    sprout: '#EAF3DE',
+    harvest: '#EAF3DE',
+    alert: '#FAECE7',
   }
   const textMap: Record<string, string> = {
-    sprout: 'text-sprout-600',
-    harvest: 'text-sprout-600',
-    alert: 'text-alert-600',
+    sprout: '#3B6D11',
+    harvest: '#3B6D11',
+    alert: '#993C1D',
   }
 
   return (
-    <View className={`flex-1 ${bgMap[color]} rounded-card p-3 items-center`}>
-      <Text className={`text-2xl font-bold ${textMap[color]}`}>{value}</Text>
-      <Text className="text-xs text-gray-500">{label}</Text>
+    <View style={{ flex: 1, backgroundColor: bgMap[color], borderRadius: 12, padding: 12, alignItems: 'center' }}>
+      <Text style={{ fontSize: 24, fontWeight: 'bold', color: textMap[color] }}>{value}</Text>
+      <Text style={{ fontSize: 12, color: '#6b7280' }}>{label}</Text>
     </View>
   )
 }

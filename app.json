@@ -53,7 +53,8 @@
         {
           "cameraPermission": "SproutPal needs camera access to capture sprout photos."
         }
-      ]
+      ],
+      "expo-audio"
     ],
     "experiments": {
       "typedRoutes": true
