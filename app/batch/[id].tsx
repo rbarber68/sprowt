@@ -127,6 +127,29 @@ export default function BatchDetailScreen() {
     }
   }
 
+  // Soak timer state — hooks MUST be called before any early return
+  const [soakCountdown, setSoakCountdown] = useState('')
+  const [showDrainReveal, setShowDrainReveal] = useState(false)
+
+  useEffect(() => {
+    if (!batch || batch.status !== 'soaking') return
+    const soakEnd = batch.jarStartAt
+    const update = () => {
+      const remaining = Math.max(0, soakEnd - Date.now())
+      if (remaining <= 0) {
+        setSoakCountdown('DONE!')
+        return
+      }
+      const hrs = Math.floor(remaining / 3600000)
+      const mins = Math.floor((remaining % 3600000) / 60000)
+      const secs = Math.floor((remaining % 60000) / 1000)
+      setSoakCountdown(hrs > 0 ? `${hrs}h ${mins}m ${secs}s` : mins > 0 ? `${mins}m ${secs}s` : `${secs}s`)
+    }
+    update()
+    const interval = setInterval(update, 1000)
+    return () => clearInterval(interval)
+  }, [batch?.status, batch?.jarStartAt])
+
   if (!batch || !character || !beanType) {
     return (
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
@@ -140,35 +163,13 @@ export default function BatchDetailScreen() {
   const totalDays = Math.ceil((beanType.soakHours / 24) + beanType.growDays)
   const sproutData = SPROUT_TYPES.find(s => s.id === beanType.id)
 
-  // Soak timer state
-  const soakEndTime = batch.jarStartAt // jarStartAt = when soak ends
+  // Soak computed values
+  const soakEndTime = batch.jarStartAt
   const soakTotalMs = (beanType.soakHours * 3600000)
   const soakElapsedMs = now - batch.soakStartAt
   const soakRemainingMs = Math.max(0, soakEndTime - now)
   const soakProgress = Math.min(soakElapsedMs / soakTotalMs, 1)
   const soakDone = soakRemainingMs <= 0
-
-  // Live countdown timer for soaking
-  const [soakCountdown, setSoakCountdown] = useState('')
-  useEffect(() => {
-    if (batch.status !== 'soaking') return
-    const update = () => {
-      const remaining = Math.max(0, soakEndTime - Date.now())
-      if (remaining <= 0) {
-        setSoakCountdown('DONE!')
-        return
-      }
-      const hrs = Math.floor(remaining / 3600000)
-      const mins = Math.floor((remaining % 3600000) / 60000)
-      const secs = Math.floor((remaining % 60000) / 1000)
-      setSoakCountdown(hrs > 0 ? `${hrs}h ${mins}m ${secs}s` : mins > 0 ? `${mins}m ${secs}s` : `${secs}s`)
-    }
-    update()
-    const interval = setInterval(update, 1000)
-    return () => clearInterval(interval)
-  }, [batch.status, soakEndTime])
-
-  const [showDrainReveal, setShowDrainReveal] = useState(false)
 
   const handleDrainToJar = async () => {
     try {
