@@ -113,7 +113,7 @@ export function BatchCardFun({ batch, onPress, onRinseLog, onCharacterPress }: B
         <View style={{ flex: 1 }}>
           {/* Name + status badge row */}
           <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
-            <Text style={{ fontWeight: 'bold', color: '#27500A', fontSize: 16, flex: 1 }} numberOfLines={1}>
+            <Text style={{ fontWeight: 'bold', color: '#27500A', fontSize: 15, flex: 1 }} numberOfLines={2}>
               {batch.characterName}
             </Text>
             <View style={{ backgroundColor: cfg.labelBg, paddingHorizontal: 10, paddingVertical: 3, borderRadius: 12 }}>

@@ -3,7 +3,7 @@
  * Bottom sheet chat UI with context-aware suggested questions
  */
 
-import { View, Text, TouchableOpacity, TextInput, ScrollView, KeyboardAvoidingView, Platform } from 'react-native'
+import { View, Text, TouchableOpacity, TextInput, ScrollView, KeyboardAvoidingView, Platform, Modal } from 'react-native'
 import { useState, useEffect, useRef } from 'react'
 import { chatWithGenie, getRecentMessages, summarizeAndPrune } from '@/lib/genie'
 
@@ -88,11 +88,12 @@ export function GenieChat({ visible, onClose, screenContext }: GenieChatProps) {
   if (!visible) return null
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' }}
-    >
-      <View style={{ backgroundColor: '#ffffff', borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: '80%', minHeight: '50%' }}>
+    <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={handleClose}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={{ flex: 1, backgroundColor: '#ffffff' }}
+      >
+      <View style={{ flex: 1 }}>
         {/* Header */}
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#f3f4f6' }}>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -188,6 +189,7 @@ export function GenieChat({ visible, onClose, screenContext }: GenieChatProps) {
           </TouchableOpacity>
         </View>
       </View>
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </Modal>
   )
 }

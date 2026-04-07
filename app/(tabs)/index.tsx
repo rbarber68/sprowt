@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, ScrollView, Linking } from 'react-native'
+import { View, Text, TouchableOpacity, ScrollView, RefreshControl, Linking } from 'react-native'
 import { Link, router, useFocusEffect } from 'expo-router'
 import { useCallback, useState } from 'react'
 import * as Notifications from 'expo-notifications'
@@ -34,6 +34,13 @@ export default function FarmScreen() {
   const [showBriefing, setShowBriefing] = useState(false)
   const [achievementToast, setAchievementToast] = useState<Achievement | null>(null)
   const [playerLevel, setPlayerLevel] = useState(getPlayerLevel())
+  const [refreshing, setRefreshing] = useState(false)
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true)
+    await loadData()
+    setRefreshing(false)
+  }, [])
   const [showGenie, setShowGenie] = useState(false)
 
   useFocusEffect(
@@ -213,9 +220,9 @@ export default function FarmScreen() {
       )}
 
       {viewMode === 'fun' ? (
-        <FunView batches={batchData} gemmaTip={gemmaTip} onOpenGenie={() => setShowGenie(true)} />
+        <FunView batches={batchData} gemmaTip={gemmaTip} onOpenGenie={() => setShowGenie(true)} refreshing={refreshing} onRefresh={onRefresh} />
       ) : (
-        <BusinessView batches={batchData} />
+        <BusinessView batches={batchData} refreshing={refreshing} onRefresh={onRefresh} />
       )}
 
       {/* FAB */}
@@ -268,12 +275,15 @@ type BatchDisplay = {
   isOverdue: boolean
 }
 
-function FunView({ batches, gemmaTip, onOpenGenie }: { batches: BatchDisplay[]; gemmaTip: string | null; onOpenGenie: () => void }) {
+function FunView({ batches, gemmaTip, onOpenGenie, refreshing, onRefresh }: { batches: BatchDisplay[]; gemmaTip: string | null; onOpenGenie: () => void; refreshing: boolean; onRefresh: () => void }) {
   // Find the most urgent batch for the Gemma bubble
   const urgentBatch = batches.find(b => b.isOverdue) ?? batches.find(b => b.status === 'ready') ?? batches[0]
 
   return (
-    <ScrollView style={{ flex: 1, paddingHorizontal: 16 }}>
+    <ScrollView
+      style={{ flex: 1, paddingHorizontal: 16 }}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#3B6D11']} tintColor="#3B6D11" />}
+    >
       {/* Batch cards - full width */}
       {batches.map(batch => (
         <BatchCardFun
@@ -310,13 +320,16 @@ function FunView({ batches, gemmaTip, onOpenGenie }: { batches: BatchDisplay[]; 
   )
 }
 
-function BusinessView({ batches }: { batches: BatchDisplay[] }) {
+function BusinessView({ batches, refreshing, onRefresh }: { batches: BatchDisplay[]; refreshing: boolean; onRefresh: () => void }) {
   // Metrics
   const readyCount = batches.filter(b => b.status === 'ready').length
   const needRinse = batches.filter(b => b.isOverdue).length
 
   return (
-    <ScrollView style={{ flex: 1 }}>
+    <ScrollView
+      style={{ flex: 1 }}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#3B6D11']} tintColor="#3B6D11" />}
+    >
       {/* Metrics strip */}
       <View style={{ flexDirection: 'row', paddingHorizontal: 16, gap: 12, marginBottom: 16 }}>
         <MetricCard label="Active" value={String(batches.length)} color="sprout" />
