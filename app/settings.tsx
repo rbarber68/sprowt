@@ -278,27 +278,73 @@ export default function SettingsScreen() {
         </SettingSection>
 
         {/* Gemma API Key */}
-        <SettingSection title="Gemma API Key">
-          <Text style={{ fontSize: 12, color: '#9ca3af', marginBottom: 8 }}>Google AI Studio API key for AI features</Text>
+        <SettingSection title="Sprout Genie AI">
+          <View style={{ backgroundColor: '#E6F1FB', borderRadius: 12, padding: 12, marginBottom: 12 }}>
+            <Text style={{ fontSize: 13, color: '#185FA5', lineHeight: 20 }}>
+              {'\ud83e\uddde'} The Sprout Genie uses Google's Gemini AI for personalized advice, recipes, and character-voiced tips.
+            </Text>
+            <Text style={{ fontSize: 12, color: '#378ADD', marginTop: 6 }}>
+              Get a free key: aistudio.google.com/apikey
+            </Text>
+          </View>
+          <Text style={{ fontSize: 12, color: '#9ca3af', marginBottom: 8 }}>API Key</Text>
           <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
             <TextInput
               style={{ flex: 1, backgroundColor: '#f3f4f6', borderRadius: 12, paddingHorizontal: 16, paddingVertical: 10, fontSize: 14 }}
-              value={showApiKey ? apiKey : apiKey ? '••••••••' : ''}
+              value={showApiKey ? apiKey : apiKey ? '\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022' : ''}
               onChangeText={setApiKey}
-              placeholder="Paste API key"
+              placeholder="Paste your API key here"
               placeholderTextColor="#999"
               secureTextEntry={!showApiKey}
               onFocus={() => setShowApiKey(true)}
               onBlur={() => setShowApiKey(false)}
             />
           </View>
-          <TouchableOpacity
-            activeOpacity={0.7}
-            style={{ backgroundColor: '#E6F1FB', borderWidth: 1, borderColor: '#85B7EB', paddingVertical: 10, borderRadius: 12, alignItems: 'center' }}
-            onPress={saveApiKey}
-          >
-            <Text style={{ color: '#185FA5', fontWeight: '500' }}>Save Key</Text>
-          </TouchableOpacity>
+          <View style={{ flexDirection: 'row', gap: 8 }}>
+            <TouchableOpacity
+              activeOpacity={0.7}
+              style={{ flex: 1, backgroundColor: '#3B6D11', paddingVertical: 10, borderRadius: 12, alignItems: 'center' }}
+              onPress={saveApiKey}
+            >
+              <Text style={{ color: '#ffffff', fontWeight: '500' }}>Save Key</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              activeOpacity={0.7}
+              style={{ flex: 1, backgroundColor: '#E6F1FB', borderWidth: 1, borderColor: '#85B7EB', paddingVertical: 10, borderRadius: 12, alignItems: 'center' }}
+              onPress={async () => {
+                if (!apiKey) { Alert.alert('No key', 'Enter an API key first.'); return }
+                saveApiKey()
+                try {
+                  const { callGemma } = require('@/lib/gemma')
+                  const result = await callGemma(
+                    'You are the Sprout Genie. Respond in 1 sentence.',
+                    'Say hello and confirm you are working.',
+                    50,
+                  )
+                  if (result) {
+                    Alert.alert('AI Connected!', `Genie says: "${result}"`)
+                  } else {
+                    Alert.alert('No response', 'Key saved but got empty response. Check the key.')
+                  }
+                } catch (e: any) {
+                  Alert.alert('Connection failed', e?.message ?? 'Check your API key and try again.')
+                }
+              }}
+            >
+              <Text style={{ color: '#185FA5', fontWeight: '500' }}>Test Key</Text>
+            </TouchableOpacity>
+          </View>
+          {apiKey ? (
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 8, gap: 4 }}>
+              <Text style={{ fontSize: 14 }}>{'\u2705'}</Text>
+              <Text style={{ fontSize: 12, color: '#3B6D11' }}>Key saved — Genie AI is active</Text>
+            </View>
+          ) : (
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 8, gap: 4 }}>
+              <Text style={{ fontSize: 14 }}>{'\ud83d\udca4'}</Text>
+              <Text style={{ fontSize: 12, color: '#9ca3af' }}>No key — Genie uses offline mode</Text>
+            </View>
+          )}
         </SettingSection>
 
         {/* Data Export/Import */}
