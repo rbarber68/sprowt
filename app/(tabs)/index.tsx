@@ -14,6 +14,9 @@ import { BatchCardBusiness } from '@/components/BatchCardBusiness'
 import { GemmaBubble } from '@/components/GemmaBubble'
 import { GenieChat } from '@/components/GenieChat'
 import { DailyBriefing, shouldShowDailyBriefing, markDailyBriefingShown } from '@/components/DailyBriefing'
+import { AchievementToast } from '@/components/AchievementToast'
+import { checkAchievements, getPlayerLevel } from '@/lib/achievements'
+import type { Achievement } from '@/data/achievements'
 
 type BatchRow = {
   batches: typeof batches.$inferSelect
@@ -29,6 +32,8 @@ export default function FarmScreen() {
   const [gemmaTip, setGemmaTip] = useState<string | null>(null)
   const [notifDenied, setNotifDenied] = useState(false)
   const [showBriefing, setShowBriefing] = useState(false)
+  const [achievementToast, setAchievementToast] = useState<Achievement | null>(null)
+  const [playerLevel, setPlayerLevel] = useState(getPlayerLevel())
   const [showGenie, setShowGenie] = useState(false)
 
   useFocusEffect(
@@ -50,6 +55,13 @@ export default function FarmScreen() {
       if (shouldShowDailyBriefing()) {
         setShowBriefing(true)
       }
+
+      // Check for new achievements
+      const newAchievements = await checkAchievements()
+      if (newAchievements.length > 0) {
+        setAchievementToast(newAchievements[0])
+      }
+      setPlayerLevel(getPlayerLevel())
 
       // Check and update batch statuses (soaking→growing, growing→ready)
       const statuses = await checkBatchStatuses()
@@ -169,6 +181,23 @@ export default function FarmScreen() {
         </View>
       </View>
 
+      {/* Player Level Bar */}
+      <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingBottom: 8, gap: 8 }}>
+        <Text style={{ fontSize: 16 }}>{playerLevel.emoji}</Text>
+        <View style={{ flex: 1 }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+            <Text style={{ fontSize: 11, fontWeight: '600', color: '#27500A' }}>{playerLevel.title}</Text>
+            <Text style={{ fontSize: 11, color: '#9ca3af' }}>{playerLevel.xp} XP</Text>
+          </View>
+          <View style={{ height: 4, backgroundColor: '#e5e7eb', borderRadius: 2, marginTop: 3 }}>
+            <View style={{ height: 4, backgroundColor: '#639922', borderRadius: 2, width: `${playerLevel.progressToNext * 100}%` }} />
+          </View>
+        </View>
+        {playerLevel.nextLevel && (
+          <Text style={{ fontSize: 10, color: '#9ca3af' }}>Lv.{playerLevel.nextLevel.level}</Text>
+        )}
+      </View>
+
       {/* Notification permission denied banner */}
       {notifDenied && activeBatches.length > 0 && (
         <TouchableOpacity
@@ -207,6 +236,11 @@ export default function FarmScreen() {
       <DailyBriefing
         visible={showBriefing}
         onDismiss={() => { setShowBriefing(false); markDailyBriefingShown() }}
+      />
+
+      <AchievementToast
+        achievement={achievementToast}
+        onDismiss={() => { setAchievementToast(null); setPlayerLevel(getPlayerLevel()) }}
       />
     </View>
   )

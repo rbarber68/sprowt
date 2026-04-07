@@ -16,6 +16,7 @@ import { cancelBatchNotifications } from '@/lib/notifications'
 import { generateRinseAnalysis, generateHarvestCelebration, isGemmaAvailable } from '@/lib/gemma'
 import { HarvestCelebration } from '@/components/HarvestCelebration'
 import { playSound } from '@/lib/sounds'
+import { markRinseDay } from '@/lib/achievements'
 import { generateCharacter } from '@/data/characters'
 import { CameraView, useCameraPermissions } from 'expo-camera'
 import { Paths, File as ExpoFile, Directory } from 'expo-file-system/next'
@@ -209,6 +210,7 @@ export default function BatchDetailScreen() {
       observations: data.observations.length > 0 ? JSON.stringify(data.observations) : null,
     })
     playSound('water-splash')
+    markRinseDay() // Track for streak achievements
     setShowRinseLogger(false)
     loadBatch()
 
