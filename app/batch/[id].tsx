@@ -171,15 +171,19 @@ export default function BatchDetailScreen() {
   const [showDrainReveal, setShowDrainReveal] = useState(false)
 
   const handleDrainToJar = async () => {
-    playSound('dice-roll')
-    setShowDrainReveal(true)
-    // Delay the actual status change so the reveal animation plays
-    setTimeout(async () => {
-      playSound('tada')
+    try {
+      playSound('dice-roll').catch(() => {})
+      // Update DB first, then show reveal
       await db.update(batches)
         .set({ status: 'growing', jarStartAt: Date.now(), updatedAt: Date.now() })
         .where(eq(batches.id, batch.id))
-    }, 600)
+      setShowDrainReveal(true)
+      setTimeout(() => { playSound('tada').catch(() => {}) }, 600)
+    } catch (e) {
+      console.error('Drain failed:', e)
+      // Still show reveal even if DB update fails
+      setShowDrainReveal(true)
+    }
   }
 
   const handleRevealDismiss = () => {

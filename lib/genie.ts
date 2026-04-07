@@ -133,27 +133,36 @@ export async function chatWithGenie(
   const context = await buildContextSnapshot(screenContext)
   const fullUserMessage = `${context}\n\n---\nUser: ${userMessage}`
 
-  // Save user message
-  await db.insert(genieMessages).values({
-    id: uuidv4(),
-    role: 'user',
-    content: userMessage,
-    context: screenContext ? JSON.stringify(screenContext) : null,
-    createdAt: Date.now(),
-  })
+  // Save user message (non-blocking — don't crash if DB fails)
+  try {
+    await db.insert(genieMessages).values({
+      id: uuidv4(),
+      role: 'user',
+      content: userMessage,
+      context: screenContext ? JSON.stringify(screenContext) : null,
+      createdAt: Date.now(),
+    })
+  } catch {}
 
-  // Call Gemma
-  const response = await callGemma(systemPrompt, fullUserMessage, 200)
-  const genieResponse = response || "The Genie is taking a quick nap. Try again in a moment!"
+  // Call Gemma — or use smart fallback if no API key
+  let genieResponse: string
+  try {
+    const response = await callGemma(systemPrompt, fullUserMessage, 200)
+    genieResponse = response || getOfflineResponse(userMessage, context)
+  } catch {
+    genieResponse = getOfflineResponse(userMessage, context)
+  }
 
-  // Save genie response
-  await db.insert(genieMessages).values({
-    id: uuidv4(),
-    role: 'genie',
-    content: genieResponse,
-    context: screenContext ? JSON.stringify(screenContext) : null,
-    createdAt: Date.now(),
-  })
+  // Save genie response (non-blocking)
+  try {
+    await db.insert(genieMessages).values({
+      id: uuidv4(),
+      role: 'genie',
+      content: genieResponse,
+      context: screenContext ? JSON.stringify(screenContext) : null,
+      createdAt: Date.now(),
+    })
+  } catch {}
 
   return genieResponse
 }
@@ -223,4 +232,57 @@ export async function genieNotification(
   }
 
   return callGemma(systemPrompt, prompts[type] ?? prompts.tip, 60)
+}
+
+/**
+ * Smart offline responses when no API key is set.
+ * Parses the user message and context to give relevant answers.
+ */
+function getOfflineResponse(userMessage: string, context: string): string {
+  const msg = userMessage.toLowerCase()
+
+  // Parse context for batch info
+  const hasBatches = context.includes('ACTIVE BATCHES:')
+  const batchCount = (context.match(/^- /gm) || []).length
+
+  // Recipe questions
+  if (msg.includes('recipe') || msg.includes('cook') || msg.includes('eat')) {
+    return "Great question! Check the Library tab for sprout details, or harvest a batch to see personalized recipe suggestions. Pro tip: broccoli sprouts are amazing on avocado toast with a pinch of mustard seed powder for 3x sulforaphane boost!"
+  }
+
+  // Growing tips
+  if (msg.includes('tip') || msg.includes('help') || msg.includes('advice')) {
+    const tips = [
+      "Keep your rinse water cool — cold rinses produce crunchier sprouts! And always drain thoroughly. Standing water is the #1 cause of spoilage.",
+      "Room temperature matters! 68-72F is the sweet spot for most sprouts. Too warm and they grow fast but taste bitter. Too cool and they stall.",
+      "Fuzzy white root hairs are NORMAL — they're not mold! Real mold is gray/black and smells off. Don't throw away a healthy batch!",
+      "Try the mustard seed powder hack: sprinkle it on broccoli sprouts right before eating. It provides the enzyme that boosts sulforaphane absorption 3x!",
+      "For best results, rinse 3x daily at consistent times. Your sprouts are living things — they thrive on routine!",
+    ]
+    return tips[Math.floor(Math.random() * tips.length)]
+  }
+
+  // What to grow
+  if (msg.includes('grow') || msg.includes('start') || msg.includes('next') || msg.includes('what should')) {
+    if (!hasBatches) {
+      return "Welcome to The Great Sprout-Off! I'd recommend starting with lentils — they're ready in just 3 days and nearly impossible to mess up. Tap the + button to start your first batch!"
+    }
+    return "Looking to expand your farm? Try mixing it up! If you've been growing jar sprouts, try radish for some spice. Or pair broccoli with mung for a glucosinolate power combo. Check the Planner tab for stagger scheduling!"
+  }
+
+  // Farm status
+  if (msg.includes('farm') || msg.includes('status') || msg.includes('how')) {
+    if (!hasBatches) {
+      return "Your farm is empty but full of potential! Start your first batch and I'll help you track everything. Tap the + button on the Farm View to begin!"
+    }
+    return `You've got ${batchCount} contestant${batchCount !== 1 ? 's' : ''} in The Great Sprout-Off! Keep up with your rinse schedule and check the Daily Briefing (newspaper icon) for your farm's full status report.`
+  }
+
+  // Default — friendly and helpful
+  const defaults = [
+    "I'm the Sprout Genie — your sprouting advisor! Ask me about growing tips, recipes, what to grow next, or your farm status. Set up a Google AI Studio API key in Settings for personalized AI-powered advice!",
+    "Hey there! I can help with growing tips, recipes, and farm management. For the full AI experience with personalized character-voiced advice, add your Google AI Studio API key in Settings!",
+    "Welcome to The Great Sprout-Off! I work best with a Google AI Studio API key (free at aistudio.google.com). Without it, I still know tons about sprouting — just ask me anything!",
+  ]
+  return defaults[Math.floor(Math.random() * defaults.length)]
 }
