@@ -9,6 +9,7 @@ import { batches, beanTypes, characters, containers, genieMemory, genieMessages 
 import { eq, and, ne, desc, isNotNull, sql } from 'drizzle-orm'
 import { getKVStore, KV_KEYS } from './kvstore'
 import { callGemma } from './gemma'
+import { unifiedAiCall, isOnDeviceReady } from './ondevice-ai'
 import { getPerformanceSummary } from './performance'
 
 const GENIE_SYSTEM_PROMPT_FUN = `You are the Sprout Genie — the enthusiastic, all-knowing host of SproutPal's "The Great Sprout-Off!"
@@ -144,11 +145,18 @@ export async function chatWithGenie(
     })
   } catch {}
 
-  // Call Gemma — or use smart fallback if no API key
+  // Call AI — tries on-device first, then cloud, then offline
   let genieResponse: string
   try {
-    const response = await callGemma(systemPrompt, fullUserMessage, 200)
-    genieResponse = response || getOfflineResponse(userMessage, context)
+    const { response, source } = await unifiedAiCall(systemPrompt, fullUserMessage, 200)
+    if (response) {
+      genieResponse = response
+      // Append source indicator
+      const sourceTag = source === 'ondevice' ? ' \ud83e\udde0' : source === 'cloud' ? ' \u2601\ufe0f' : ''
+      genieResponse += sourceTag
+    } else {
+      genieResponse = getOfflineResponse(userMessage, context)
+    }
   } catch {
     genieResponse = getOfflineResponse(userMessage, context)
   }

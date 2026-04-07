@@ -6,6 +6,7 @@ import { batches, characters, beanTypes, dailyLogs, seedSources, seedAdjustments
 import { getAllContainers, deleteContainer } from '@/lib/containers'
 import type { containers as containersTable } from '@/db/schema'
 import * as Sharing from 'expo-sharing'
+import { OnDeviceAIStatus } from '@/components/OnDeviceAI'
 import * as DocumentPicker from 'expo-document-picker'
 import { Paths, File } from 'expo-file-system/next'
 
@@ -277,8 +278,13 @@ export default function SettingsScreen() {
           </TouchableOpacity>
         </SettingSection>
 
-        {/* Gemma API Key */}
-        <SettingSection title="Sprout Genie AI">
+        {/* On-Device AI */}
+        <SettingSection title="On-Device AI">
+          <OnDeviceAIStatus />
+        </SettingSection>
+
+        {/* Cloud AI */}
+        <SettingSection title="Cloud AI (Gemini)">
           <View style={{ backgroundColor: '#E6F1FB', borderRadius: 12, padding: 12, marginBottom: 12 }}>
             <Text style={{ fontSize: 13, color: '#185FA5', lineHeight: 20 }}>
               {'\ud83e\uddde'} The Sprout Genie uses Google's Gemini AI for personalized advice, recipes, and character-voiced tips.
