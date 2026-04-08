@@ -1,37 +1,41 @@
 /**
  * SproutPal — On-Device AI
- * Runs Gemma/LLM locally via react-native-executorch
+ * Runs Gemma 3 1B locally via react-native-executorch
  * Falls back to cloud Gemini API, then static responses
  */
 
 import { getKVStore, setKVStore, KV_KEYS } from './kvstore'
 
-// Model status tracking
+// Gemma 3 1B — exported to PTE format for ExecuTorch mobile inference
+// TODO: Replace URLs with your exported model once uploaded to HuggingFace
+export const GEMMA3_MODEL = {
+  name: 'Gemma 3 1B IT (INT4)',
+  // These URLs point to the ExecuTorch-exported PTE model + tokenizer
+  // After running the export: update these with your HuggingFace repo URLs
+  url: 'https://huggingface.co/rbarber68/gemma3-1b-executorch/resolve/main/model.pte',
+  tokenizerUrl: 'https://huggingface.co/google/gemma-3-1b-it/raw/main/tokenizer.json',
+  tokenizerConfigUrl: 'https://huggingface.co/google/gemma-3-1b-it/raw/main/tokenizer_config.json',
+  size: '~500 MB',
+  description: 'Gemma 3 1B — runs locally via ExecuTorch, no internet needed',
+}
+
+// State
+let _generate: ((messages: Array<{role: string; content: string}>) => Promise<string>) | null = null
+let _sendMessage: ((message: string) => Promise<string>) | null = null
 let _modelReady = false
 let _modelLoading = false
-let _llmInstance: any = null
+let _downloadProgress = 0
 
-/**
- * Check if on-device AI is available and loaded
- */
-export function isOnDeviceReady(): boolean {
-  return _modelReady
-}
+export function isOnDeviceReady(): boolean { return _modelReady }
+export function isOnDeviceLoading(): boolean { return _modelLoading }
+export function getDownloadProgress(): number { return _downloadProgress }
 
-export function isOnDeviceLoading(): boolean {
-  return _modelLoading
-}
-
-/**
- * Get the preferred AI mode
- */
 export function getAiMode(): 'ondevice' | 'cloud' | 'offline' {
   const mode = getKVStore('aiMode')
   if (mode === 'ondevice' || mode === 'cloud' || mode === 'offline') return mode
-  // Auto-detect: prefer cloud if key exists, then ondevice, then offline
   const hasApiKey = !!getKVStore(KV_KEYS.GOOGLE_AI_API_KEY)
-  if (hasApiKey) return 'cloud'
   if (_modelReady) return 'ondevice'
+  if (hasApiKey) return 'cloud'
   return 'offline'
 }
 
@@ -39,41 +43,49 @@ export function setAiMode(mode: 'ondevice' | 'cloud' | 'offline') {
   setKVStore('aiMode', mode)
 }
 
-/**
- * Initialize the on-device LLM model.
- * This downloads the model (~1.5GB) on first use.
- * Call from a component using the useLLM hook.
- */
-export function setLlmInstance(instance: any) {
-  _llmInstance = instance
-  _modelReady = instance?.isReady ?? false
+/** Called from OnDeviceAI component to sync hook state */
+export function syncLlmState(hook: {
+  isReady: boolean
+  downloadProgress: number
+  generate?: any
+  sendMessage?: any
+}) {
+  _modelReady = hook.isReady
+  _downloadProgress = hook.downloadProgress
+  _generate = hook.generate ?? null
+  _sendMessage = hook.sendMessage ?? null
 }
 
-export function setModelLoading(loading: boolean) {
-  _modelLoading = loading
-}
-
-export function setModelReady(ready: boolean) {
-  _modelReady = ready
-}
+export function setModelLoading(loading: boolean) { _modelLoading = loading }
 
 /**
- * Generate a response using on-device AI.
- * Returns empty string if model not ready.
+ * Generate using on-device Gemma 3 via ExecuTorch.
  */
 export async function generateOnDevice(
   systemPrompt: string,
   userMessage: string,
 ): Promise<string> {
-  if (!_llmInstance || !_modelReady) return ''
+  if (!_modelReady) return ''
 
   try {
-    const chat = [
-      { role: 'system' as const, content: systemPrompt },
-      { role: 'user' as const, content: userMessage },
-    ]
-    const response = await _llmInstance.generate(chat)
-    return response ?? ''
+    // react-native-executorch's generate() takes a chat array
+    if (_generate) {
+      const messages = [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userMessage },
+      ]
+      const response = await _generate(messages)
+      return (response ?? '').trim()
+    }
+
+    // Fallback to sendMessage (managed mode)
+    if (_sendMessage) {
+      const prompt = `${systemPrompt}\n\nUser: ${userMessage}`
+      const response = await _sendMessage(prompt)
+      return (response ?? '').trim()
+    }
+
+    return ''
   } catch (e) {
     console.warn('On-device AI error:', e)
     return ''
@@ -90,8 +102,8 @@ export async function unifiedAiCall(
 ): Promise<{ response: string; source: 'ondevice' | 'cloud' | 'offline' }> {
   const mode = getAiMode()
 
-  // Try on-device first (if preferred and ready)
-  if ((mode === 'ondevice' || mode === 'cloud') && _modelReady) {
+  // Try on-device first
+  if (_modelReady && (mode === 'ondevice' || mode === 'cloud')) {
     const response = await generateOnDevice(systemPrompt, userMessage)
     if (response) return { response, source: 'ondevice' }
   }
@@ -105,6 +117,5 @@ export async function unifiedAiCall(
     } catch {}
   }
 
-  // Offline fallback
   return { response: '', source: 'offline' }
 }

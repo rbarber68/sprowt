@@ -1,77 +1,72 @@
 /**
  * SproutPal — On-Device AI Provider
- * Manages LLM model download and loading via react-native-executorch
+ * Downloads and runs Gemma 3 1B locally via react-native-executorch
  */
 
 import { View, Text, TouchableOpacity } from 'react-native'
-import { useState, useEffect } from 'react'
-import { setLlmInstance, setModelLoading, setModelReady, isOnDeviceReady } from '@/lib/ondevice-ai'
+import { useEffect, useState } from 'react'
+import { GEMMA3_MODEL, syncLlmState, setModelLoading } from '@/lib/ondevice-ai'
 
-// Lazy import to avoid crash if native module not built yet
+// Lazy import — native module needs a native rebuild
 let useLLM: any = null
-let LLAMA3_2_1B: any = null
 try {
-  const rne = require('react-native-executorch')
-  useLLM = rne.useLLM
-  // Use smallest available model — Llama 3.2 1B or similar
-  LLAMA3_2_1B = rne.LLAMA3_2_1B
+  useLLM = require('react-native-executorch').useLLM
 } catch {
-  // Native module not available — will show setup instructions
+  // Native module not available yet
 }
 
 interface OnDeviceAIStatusProps {
   compact?: boolean
 }
 
-/**
- * Shows AI model status and download button.
- * Place this in Settings or as a card on Farm View.
- */
 export function OnDeviceAIStatus({ compact = false }: OnDeviceAIStatusProps) {
   if (!useLLM) {
     return compact ? null : (
-      <View style={{ backgroundColor: '#FAEEDA', borderRadius: 12, padding: 16, margin: 16 }}>
+      <View style={{ backgroundColor: '#FAEEDA', borderRadius: 12, padding: 16 }}>
         <Text style={{ color: '#854F0B', fontSize: 13, lineHeight: 20 }}>
-          {'\ud83e\udde0'} On-device AI requires a native rebuild. Run: npx expo run:android
+          {'\ud83e\udde0'} On-device AI needs a native rebuild.{'\n'}
+          Run: npx expo run:android
         </Text>
       </View>
     )
   }
 
-  return <OnDeviceAIStatusInner compact={compact} />
+  return <OnDeviceAIInner compact={compact} />
 }
 
-function OnDeviceAIStatusInner({ compact }: { compact: boolean }) {
-  const llm = useLLM({ model: LLAMA3_2_1B, preventLoad: true })
-  const [downloading, setDownloading] = useState(false)
+function OnDeviceAIInner({ compact }: { compact: boolean }) {
+  const llm = useLLM({
+    model: {
+      modelSource: GEMMA3_MODEL.url,
+      tokenizerSource: GEMMA3_MODEL.tokenizerUrl,
+      tokenizerConfigSource: GEMMA3_MODEL.tokenizerConfigUrl,
+    },
+  })
+
+  const [error, setError] = useState<string | null>(null)
+
+  // Sync LLM state to our module
+  useEffect(() => {
+    syncLlmState({
+      isReady: llm.isReady ?? false,
+      downloadProgress: llm.downloadProgress ?? 0,
+      generate: llm.generate,
+      sendMessage: llm.sendMessage,
+    })
+  }, [llm.isReady, llm.downloadProgress])
 
   useEffect(() => {
-    setLlmInstance(llm)
-    setModelReady(llm.isReady)
-    setModelLoading(false)
-  }, [llm.isReady])
-
-  const handleDownload = async () => {
-    setDownloading(true)
-    setModelLoading(true)
-    try {
-      await llm.downloadModel?.()
-      await llm.loadModel?.()
-    } catch (e) {
-      console.warn('Model download failed:', e)
-    }
-    setDownloading(false)
-    setModelLoading(false)
-  }
+    if (llm.error) setError(String(llm.error))
+  }, [llm.error])
 
   if (compact) {
     return (
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
         <Text style={{ fontSize: 12 }}>
-          {llm.isReady ? '\ud83e\udde0' : '\ud83d\udcf2'}
+          {llm.isReady ? '\ud83e\udde0' : llm.downloadProgress > 0 ? '\u2b07\ufe0f' : '\u2601\ufe0f'}
         </Text>
         <Text style={{ fontSize: 11, color: llm.isReady ? '#3B6D11' : '#9ca3af' }}>
-          {llm.isReady ? 'On-device AI active' : 'Cloud AI'}
+          {llm.isReady ? 'Gemma 3 active (on-device)' : llm.downloadProgress > 0 ? `Downloading ${Math.round(llm.downloadProgress)}%` : 'Cloud AI'}
         </Text>
       </View>
     )
@@ -79,46 +74,57 @@ function OnDeviceAIStatusInner({ compact }: { compact: boolean }) {
 
   return (
     <View style={{ backgroundColor: '#f9fafb', borderRadius: 12, padding: 16 }}>
-      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
-        <Text style={{ fontSize: 18, marginRight: 8 }}>{'\ud83e\udde0'}</Text>
-        <Text style={{ fontSize: 15, fontWeight: '600', color: '#27500A' }}>On-Device AI</Text>
+      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
+        <Text style={{ fontSize: 20, marginRight: 8 }}>{'\ud83e\udde0'}</Text>
+        <View>
+          <Text style={{ fontSize: 15, fontWeight: '600', color: '#27500A' }}>On-Device AI</Text>
+          <Text style={{ fontSize: 11, color: '#9ca3af' }}>{GEMMA3_MODEL.description}</Text>
+        </View>
       </View>
 
       {llm.isReady ? (
-        <View>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-            <Text style={{ fontSize: 14 }}>{'\u2705'}</Text>
-            <Text style={{ fontSize: 13, color: '#3B6D11' }}>Model loaded — AI runs locally on your device</Text>
+        <View style={{ backgroundColor: '#EAF3DE', borderRadius: 10, padding: 12 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+            <Text style={{ fontSize: 16 }}>{'\u2705'}</Text>
+            <Text style={{ fontSize: 14, color: '#3B6D11', fontWeight: '600' }}>Gemma 3 loaded!</Text>
           </View>
-          <Text style={{ fontSize: 11, color: '#9ca3af', marginTop: 4 }}>No internet needed. Private. Fast.</Text>
-        </View>
-      ) : downloading ? (
-        <View>
-          <Text style={{ fontSize: 13, color: '#854F0B' }}>
-            {'\u2b07\ufe0f'} Downloading AI model... {Math.round((llm.downloadProgress ?? 0) * 100)}%
+          <Text style={{ fontSize: 12, color: '#639922', marginTop: 4 }}>
+            AI runs entirely on your device. No internet needed. Private and fast.
           </Text>
-          <View style={{ height: 4, backgroundColor: '#e5e7eb', borderRadius: 2, marginTop: 8 }}>
-            <View style={{ height: 4, backgroundColor: '#EF9F27', borderRadius: 2, width: `${(llm.downloadProgress ?? 0) * 100}%` }} />
+        </View>
+      ) : llm.downloadProgress > 0 && llm.downloadProgress < 100 ? (
+        <View>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}>
+            <Text style={{ fontSize: 13, color: '#854F0B' }}>{'\u2b07\ufe0f'} Downloading Gemma 3...</Text>
+            <Text style={{ fontSize: 13, color: '#854F0B', fontWeight: '600' }}>{Math.round(llm.downloadProgress)}%</Text>
           </View>
-          <Text style={{ fontSize: 11, color: '#9ca3af', marginTop: 4 }}>~1.5 GB download. WiFi recommended.</Text>
+          <View style={{ height: 6, backgroundColor: '#e5e7eb', borderRadius: 3 }}>
+            <View style={{ height: 6, backgroundColor: '#EF9F27', borderRadius: 3, width: `${llm.downloadProgress}%` }} />
+          </View>
+          <Text style={{ fontSize: 11, color: '#9ca3af', marginTop: 6 }}>
+            {GEMMA3_MODEL.size} download. WiFi recommended. One-time only.
+          </Text>
         </View>
       ) : (
         <View>
-          <Text style={{ fontSize: 13, color: '#6b7280', marginBottom: 8, lineHeight: 19 }}>
-            Download a small AI model to run the Sprout Genie entirely on your device — no internet needed, completely private.
+          <Text style={{ fontSize: 13, color: '#6b7280', marginBottom: 12, lineHeight: 20 }}>
+            Gemma 3 will download automatically when ready. The model runs the Sprout Genie
+            entirely on your device — no internet needed, completely private.
           </Text>
-          <TouchableOpacity
-            activeOpacity={0.7}
-            onPress={handleDownload}
-            style={{ backgroundColor: '#3B6D11', paddingVertical: 10, borderRadius: 10, alignItems: 'center' }}
-          >
-            <Text style={{ color: '#fff', fontWeight: '600', fontSize: 14 }}>{'\ud83e\udde0'} Download AI Model (~1.5 GB)</Text>
-          </TouchableOpacity>
+          <View style={{ backgroundColor: '#E6F1FB', borderRadius: 10, padding: 10 }}>
+            <Text style={{ fontSize: 12, color: '#185FA5', lineHeight: 18 }}>
+              {'\ud83d\udca1'} Model: {GEMMA3_MODEL.name}{'\n'}
+              Size: {GEMMA3_MODEL.size}{'\n'}
+              Works on most phones from 2023+ with 6GB+ RAM
+            </Text>
+          </View>
         </View>
       )}
 
-      {llm.error && (
-        <Text style={{ fontSize: 11, color: '#993C1D', marginTop: 6 }}>Error: {String(llm.error)}</Text>
+      {error && (
+        <View style={{ backgroundColor: '#FAECE7', borderRadius: 8, padding: 10, marginTop: 8 }}>
+          <Text style={{ fontSize: 12, color: '#993C1D' }}>{error}</Text>
+        </View>
       )}
     </View>
   )
